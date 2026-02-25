@@ -1,0 +1,235 @@
+generator client {
+    provider = "prisma-client"
+    output   = "./__generated__"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+model User {
+    id                String             @id @default(cuid())
+    email             String             @unique
+    phone             String?            @unique
+    password          String?
+    username          String?            @unique
+    firstName         String?            @map("first_name")
+    lastName          String?            @map("last_name")
+    description       String?
+    avatar            String?            @default("/uploads/no-user-image.png")
+    isPhoneVerified   Boolean            @default(false) @map("is_phone_verified")
+    isPasswordEnabled Boolean            @default(false) @map("is_password_enabled")
+    status            EnumUserStatus     @default(OFFLINE)
+    role              EnumUserRole       @default(USER)
+    visibility        EnumUserVisibility @default(VISIBLE)
+    lastSeen          DateTime           @updatedAt @map("last_seen")
+    createdAt         DateTime           @default(now()) @map("created_at")
+    updatedAt         DateTime           @updatedAt @map("updated_at")
+
+    messages      Message[]
+    createdChats  Chat[]
+    chats         ChatMember[]
+    archivedChats ArchivedChat[]
+    mutedChats    MutedChat[]
+    pinnedChats   PinnedChat[]
+    chatAdmins    ChatAdmin[]
+
+    @@index([email])
+    @@index([username])
+    @@index([phone])
+    @@map("users")
+}
+
+model Chat {
+    id              String       @id @default(cuid())
+    name            String
+    description     String?
+    avatar          String?      @default("/uploads/no-chat-image.png")
+    isPrivate       Boolean      @default(false) @map("is_private")
+    type            EnumChatType @default(DIRECT)
+    pinnedMessageId String?      @map("pinned_message_id")
+    lastMessageId   String?      @map("last_message_id")
+    createdAt       DateTime     @default(now()) @map("created_at")
+    updatedAt       DateTime     @updatedAt @map("updated_at")
+
+    createdBy   User           @relation(fields: [createdById], references: [id])
+    createdById String         @map("created_by_id")
+    members     ChatMember[]
+    admins      ChatAdmin[]
+    archivedBy  ArchivedChat[]
+    mutedBy     MutedChat[]
+    pinnedBy    PinnedChat[]
+    messages    Message[]
+
+    @@index([type])
+    @@map("chats")
+}
+
+model ChatMember {
+    id       String   @id @default(cuid())
+    joinedAt DateTime @default(now()) @map("joined_at")
+
+    role EnumMemberRole @default(MEMBER)
+
+    chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    chatId String @map("chat_id")
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String @map("user_id")
+
+    @@unique([chatId, userId])
+    @@index([userId])
+    @@index([chatId])
+    @@map("chat_members")
+}
+
+model ChatAdmin {
+    id      String   @id @default(cuid())
+    addedAt DateTime @default(now()) @map("added_at")
+
+    chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    chatId String @map("chat_id")
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String @map("user_id")
+
+    @@unique([chatId, userId])
+    @@map("chat_admins")
+}
+
+model Message {
+    id              String            @id @default(cuid())
+    content         String?
+    pinnedByUserId  String?           @map("pinned_by_user_id")
+    status          EnumMessageStatus @default(SENT)
+    replyToId       String?           @map("reply_to_id") // Сообщение, на которое отвечаем
+    forwardedFromId String?           @map("forwarded_from_id") // Сообщение, которое пересылаем
+    createdAt       DateTime          @default(now()) @map("created_at")
+    updatedAt       DateTime          @updatedAt @map("updated_at")
+
+    chat     Chat    @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    chatId   String  @map("chat_id")
+    sender   User    @relation(fields: [senderId], references: [id])
+    senderId String  @map("sender_id")
+    media    Media[]
+
+    @@index([chatId, createdAt])
+    @@index([senderId])
+    @@index([replyToId])
+    @@map("messages")
+}
+
+model Media {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now()) @map("created_at")
+
+    type     EnumMediaType
+    url      String
+    fileName String?       @map("file_name")
+    fileSize Int?          @map("file_size")
+
+    message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+    messageId String  @map("message_id")
+
+    @@index([messageId])
+    @@map("media")
+}
+
+model ArchivedChat {
+    id         String   @id @default(cuid())
+    archivedAt DateTime @default(now()) @map("archived_at")
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String @map("user_id")
+    chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    chatId String @map("chat_id")
+
+    @@unique([userId, chatId])
+    @@map("archived_chats")
+}
+
+model PinnedChat {
+    id       String   @id @default(cuid())
+    pinnedAt DateTime @default(now()) @map("pinned_at")
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String @map("user_id")
+    chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    chatId String @map("chat_id")
+
+    @@unique([userId, chatId])
+    @@map("pinned_chats")
+}
+
+model MutedChat {
+    id         String    @id @default(cuid())
+    mutedUntil DateTime? @map("muted_until")
+    mutedAt    DateTime  @default(now()) @map("muted_at")
+
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId String @map("user_id")
+    chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    chatId String @map("chat_id")
+
+    @@unique([userId, chatId])
+    @@map("muted_chats")
+}
+
+model Token {
+    id String @id @default(uuid())
+
+    email     String
+    token     String        @unique
+    type      EnumTokenType
+    expiresIn DateTime
+
+    createdAt DateTime @default(now())
+
+    @@map("tokens")
+}
+
+enum EnumTokenType {
+    VERIFICATION
+    PASSWORD_RESET
+}
+
+enum EnumUserRole {
+    ADMIN
+    USER
+}
+
+enum EnumUserStatus {
+    ONLINE
+    OFFLINE
+}
+
+enum EnumUserVisibility {
+    VISIBLE
+    INVISIBLE
+}
+
+enum EnumChatType {
+    DIRECT
+    GROUP
+    CHANNEL
+}
+
+enum EnumMemberRole {
+    OWNER
+    ADMIN
+    MEMBER
+}
+
+enum EnumMessageStatus {
+    SENT
+    DELIVERED
+    READ
+    FAILED
+}
+
+enum EnumMediaType {
+    IMAGE
+    VIDEO
+    AUDIO
+    DOCUMENT
+    VOICE
+    GIF
+}
