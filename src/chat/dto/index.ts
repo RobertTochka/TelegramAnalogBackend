@@ -1,0 +1,6 @@
+export * from './chat-filter.dto'
+export * from './chat-response.dto'
+export * from './create-chat.dto'
+export * from './last-message.dto'
+export * from './participant.dto'
+export * from './update-chat.dto'

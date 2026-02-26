@@ -409,10 +409,6 @@ export type MutedChatUncheckedUpdateManyWithoutChatNestedInput = {
   deleteMany?: Prisma.MutedChatScalarWhereInput | Prisma.MutedChatScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type MutedChatCreateWithoutUserInput = {
   id?: string
   mutedUntil?: Date | string | null

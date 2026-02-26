@@ -63,6 +63,11 @@ export type ChatAdmin = Prisma.ChatAdminModel
  */
 export type Message = Prisma.MessageModel
 /**
+ * Model MessageStatus
+ * 
+ */
+export type MessageStatus = Prisma.MessageStatusModel
+/**
  * Model Media
  * 
  */

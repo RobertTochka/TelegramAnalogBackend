@@ -25,6 +25,7 @@ model User {
     lastSeen          DateTime           @updatedAt @map("last_seen")
     createdAt         DateTime           @default(now()) @map("created_at")
     updatedAt         DateTime           @updatedAt @map("updated_at")
+    deletedAt         DateTime?          @map("deleted_at")
 
     messages      Message[]
     createdChats  Chat[]
@@ -33,6 +34,7 @@ model User {
     mutedChats    MutedChat[]
     pinnedChats   PinnedChat[]
     chatAdmins    ChatAdmin[]
+    messageStatus MessageStatus[]
 
     @@index([email])
     @@index([username])
@@ -51,6 +53,7 @@ model Chat {
     lastMessageId   String?      @map("last_message_id")
     createdAt       DateTime     @default(now()) @map("created_at")
     updatedAt       DateTime     @updatedAt @map("updated_at")
+    deletedAt       DateTime?    @map("deleted_at")
 
     createdBy   User           @relation(fields: [createdById], references: [id])
     createdById String         @map("created_by_id")
@@ -96,25 +99,42 @@ model ChatAdmin {
 }
 
 model Message {
-    id              String            @id @default(cuid())
+    id              String    @id @default(cuid())
     content         String?
-    pinnedByUserId  String?           @map("pinned_by_user_id")
-    status          EnumMessageStatus @default(SENT)
-    replyToId       String?           @map("reply_to_id") // Сообщение, на которое отвечаем
-    forwardedFromId String?           @map("forwarded_from_id") // Сообщение, которое пересылаем
-    createdAt       DateTime          @default(now()) @map("created_at")
-    updatedAt       DateTime          @updatedAt @map("updated_at")
+    pinnedByUserId  String?   @map("pinned_by_user_id")
+    replyToId       String?   @map("reply_to_id") // Сообщение, на которое отвечаем
+    forwardedFromId String?   @map("forwarded_from_id") // Сообщение, которое пересылаем
+    isEdited        Boolean   @default(false) @map("is_edited")
+    createdAt       DateTime  @default(now()) @map("created_at")
+    updatedAt       DateTime  @updatedAt @map("updated_at")
+    deletedAt       DateTime? @map("deleted_at")
 
-    chat     Chat    @relation(fields: [chatId], references: [id], onDelete: Cascade)
-    chatId   String  @map("chat_id")
-    sender   User    @relation(fields: [senderId], references: [id])
-    senderId String  @map("sender_id")
+    chat     Chat            @relation(fields: [chatId], references: [id], onDelete: Cascade)
+    chatId   String          @map("chat_id")
+    sender   User            @relation(fields: [senderId], references: [id])
+    senderId String          @map("sender_id")
     media    Media[]
+    statuses MessageStatus[]
 
     @@index([chatId, createdAt])
     @@index([senderId])
     @@index([replyToId])
     @@map("messages")
+}
+
+model MessageStatus {
+    id        String            @id @default(cuid())
+    status    EnumMessageStatus @default(SENT)
+    updatedAt DateTime          @updatedAt @map("updated_at")
+
+    message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+    messageId String  @map("message_id")
+    user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    String  @map("user_id") // ID пользователя (получателя)
+
+    @@unique([messageId, userId])
+    @@index([userId, status])
+    @@map("message_statuses")
 }
 
 model Media {
@@ -223,6 +243,7 @@ enum EnumMessageStatus {
     DELIVERED
     READ
     FAILED
+    DELETED
 }
 
 enum EnumMediaType {

@@ -30,10 +30,6 @@ export class UpdateUserDto {
   @IsOptional()
   avatar?: string
 
-  @IsPhoneNumber(null, { message: 'Некорректный номер телефона' })
-  @IsOptional()
-  phone?: string
-
   @IsString()
   @MinLength(3, {
     message: 'Имя пользователя должно содержать минимум 3 символа'

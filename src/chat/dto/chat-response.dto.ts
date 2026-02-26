@@ -1,0 +1,64 @@
+import { EnumChatType } from '@prisma/__generated__/enums'
+import { Expose, Type } from 'class-transformer'
+
+import { LastMessageDto } from './last-message.dto'
+import { ParticipantDto } from './participant.dto'
+
+export class ChatResponseDto {
+  @Expose()
+  id: string
+
+  @Expose()
+  type: EnumChatType
+
+  @Expose()
+  name?: string
+
+  @Expose()
+  description?: string
+
+  @Expose()
+  avatar?: string
+
+  @Expose()
+  createdById: string
+
+  @Expose()
+  @Type(() => ParticipantDto)
+  createdBy?: ParticipantDto
+
+  @Expose()
+  isPrivate: boolean
+
+  @Expose()
+  inviteLink?: string
+
+  @Expose()
+  @Type(() => ParticipantDto)
+  participants?: ParticipantDto[]
+
+  @Expose()
+  @Type(() => LastMessageDto)
+  lastMessage?: LastMessageDto
+
+  @Expose()
+  unreadCount?: number
+
+  @Expose()
+  createdAt: Date
+
+  @Expose()
+  updatedAt: Date
+
+  @Expose()
+  participantCount?: number
+
+  @Expose()
+  isArchived?: boolean
+
+  @Expose()
+  isMuted?: boolean
+
+  @Expose()
+  isPinned?: boolean
+}

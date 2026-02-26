@@ -1,12 +1,19 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException
 } from '@nestjs/common'
+import { hash, verify } from 'argon2'
 
 import { PrismaService } from '@/prisma.service'
 
-import { CreateUserDto, SearchUsersDto, UpdateUserDto } from './dto'
+import {
+  ChangePasswordDto,
+  CreateUserDto,
+  SearchUsersDto,
+  UpdateUserDto
+} from './dto'
 
 @Injectable()
 export class UserService {
@@ -131,5 +138,30 @@ export class UserService {
     })
 
     return updatedUser
+  }
+
+  public async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.findById(userId)
+
+    if (!user) throw new NotFoundException('Пользователь не найден.')
+
+    if (user.password && !dto.oldPassword)
+      throw new BadRequestException('Введите старый пароль.')
+
+    const isPasswordsMatching = await verify(user.password, dto.oldPassword)
+
+    if (user.password && !isPasswordsMatching)
+      throw new BadRequestException('Введен неверный пароль.')
+
+    const newPassword = await hash(dto.password)
+
+    await this.prismaService.user.update({
+      where: {
+        id: userId
+      },
+      data: {
+        password: newPassword
+      }
+    })
   }
 }

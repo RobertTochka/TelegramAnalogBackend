@@ -11,7 +11,7 @@ import { EnumUserRole } from '@prisma/__generated__/enums'
 
 import { Authorization, Authorized } from '@/auth/decorators'
 
-import { SearchUsersDto, UpdateUserDto } from './dto'
+import { ChangePasswordDto, SearchUsersDto, UpdateUserDto } from './dto'
 import { UserService } from './user.service'
 
 @Controller('users')
@@ -40,5 +40,15 @@ export class UserController {
     @Body() dto: UpdateUserDto
   ) {
     return this.userService.update(userId, dto)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Patch('change-password')
+  public async changePassword(
+    @Authorized('id') userId: string,
+    @Body() dto: ChangePasswordDto
+  ) {
+    return this.userService.changePassword(userId, dto)
   }
 }

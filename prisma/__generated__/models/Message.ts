@@ -28,11 +28,12 @@ export type MessageMinAggregateOutputType = {
   id: string | null
   content: string | null
   pinnedByUserId: string | null
-  status: $Enums.EnumMessageStatus | null
   replyToId: string | null
   forwardedFromId: string | null
+  isEdited: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
   chatId: string | null
   senderId: string | null
 }
@@ -41,11 +42,12 @@ export type MessageMaxAggregateOutputType = {
   id: string | null
   content: string | null
   pinnedByUserId: string | null
-  status: $Enums.EnumMessageStatus | null
   replyToId: string | null
   forwardedFromId: string | null
+  isEdited: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
   chatId: string | null
   senderId: string | null
 }
@@ -54,11 +56,12 @@ export type MessageCountAggregateOutputType = {
   id: number
   content: number
   pinnedByUserId: number
-  status: number
   replyToId: number
   forwardedFromId: number
+  isEdited: number
   createdAt: number
   updatedAt: number
+  deletedAt: number
   chatId: number
   senderId: number
   _all: number
@@ -69,11 +72,12 @@ export type MessageMinAggregateInputType = {
   id?: true
   content?: true
   pinnedByUserId?: true
-  status?: true
   replyToId?: true
   forwardedFromId?: true
+  isEdited?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
   chatId?: true
   senderId?: true
 }
@@ -82,11 +86,12 @@ export type MessageMaxAggregateInputType = {
   id?: true
   content?: true
   pinnedByUserId?: true
-  status?: true
   replyToId?: true
   forwardedFromId?: true
+  isEdited?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
   chatId?: true
   senderId?: true
 }
@@ -95,11 +100,12 @@ export type MessageCountAggregateInputType = {
   id?: true
   content?: true
   pinnedByUserId?: true
-  status?: true
   replyToId?: true
   forwardedFromId?: true
+  isEdited?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
   chatId?: true
   senderId?: true
   _all?: true
@@ -181,11 +187,12 @@ export type MessageGroupByOutputType = {
   id: string
   content: string | null
   pinnedByUserId: string | null
-  status: $Enums.EnumMessageStatus
   replyToId: string | null
   forwardedFromId: string | null
+  isEdited: boolean
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
   chatId: string
   senderId: string
   _count: MessageCountAggregateOutputType | null
@@ -215,32 +222,36 @@ export type MessageWhereInput = {
   id?: Prisma.StringFilter<"Message"> | string
   content?: Prisma.StringNullableFilter<"Message"> | string | null
   pinnedByUserId?: Prisma.StringNullableFilter<"Message"> | string | null
-  status?: Prisma.EnumEnumMessageStatusFilter<"Message"> | $Enums.EnumMessageStatus
   replyToId?: Prisma.StringNullableFilter<"Message"> | string | null
   forwardedFromId?: Prisma.StringNullableFilter<"Message"> | string | null
+  isEdited?: Prisma.BoolFilter<"Message"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Message"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   chatId?: Prisma.StringFilter<"Message"> | string
   senderId?: Prisma.StringFilter<"Message"> | string
   chat?: Prisma.XOR<Prisma.ChatScalarRelationFilter, Prisma.ChatWhereInput>
   sender?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   media?: Prisma.MediaListRelationFilter
+  statuses?: Prisma.MessageStatusListRelationFilter
 }
 
 export type MessageOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   content?: Prisma.SortOrderInput | Prisma.SortOrder
   pinnedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
-  status?: Prisma.SortOrder
   replyToId?: Prisma.SortOrderInput | Prisma.SortOrder
   forwardedFromId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isEdited?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   chatId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
   chat?: Prisma.ChatOrderByWithRelationInput
   sender?: Prisma.UserOrderByWithRelationInput
   media?: Prisma.MediaOrderByRelationAggregateInput
+  statuses?: Prisma.MessageStatusOrderByRelationAggregateInput
 }
 
 export type MessageWhereUniqueInput = Prisma.AtLeast<{
@@ -250,27 +261,30 @@ export type MessageWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.MessageWhereInput | Prisma.MessageWhereInput[]
   content?: Prisma.StringNullableFilter<"Message"> | string | null
   pinnedByUserId?: Prisma.StringNullableFilter<"Message"> | string | null
-  status?: Prisma.EnumEnumMessageStatusFilter<"Message"> | $Enums.EnumMessageStatus
   replyToId?: Prisma.StringNullableFilter<"Message"> | string | null
   forwardedFromId?: Prisma.StringNullableFilter<"Message"> | string | null
+  isEdited?: Prisma.BoolFilter<"Message"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Message"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   chatId?: Prisma.StringFilter<"Message"> | string
   senderId?: Prisma.StringFilter<"Message"> | string
   chat?: Prisma.XOR<Prisma.ChatScalarRelationFilter, Prisma.ChatWhereInput>
   sender?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   media?: Prisma.MediaListRelationFilter
+  statuses?: Prisma.MessageStatusListRelationFilter
 }, "id">
 
 export type MessageOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   content?: Prisma.SortOrderInput | Prisma.SortOrder
   pinnedByUserId?: Prisma.SortOrderInput | Prisma.SortOrder
-  status?: Prisma.SortOrder
   replyToId?: Prisma.SortOrderInput | Prisma.SortOrder
   forwardedFromId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isEdited?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   chatId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
   _count?: Prisma.MessageCountOrderByAggregateInput
@@ -285,11 +299,12 @@ export type MessageScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Message"> | string
   content?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
   pinnedByUserId?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
-  status?: Prisma.EnumEnumMessageStatusWithAggregatesFilter<"Message"> | $Enums.EnumMessageStatus
   replyToId?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
   forwardedFromId?: Prisma.StringNullableWithAggregatesFilter<"Message"> | string | null
+  isEdited?: Prisma.BoolWithAggregatesFilter<"Message"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Message"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Message"> | Date | string | null
   chatId?: Prisma.StringWithAggregatesFilter<"Message"> | string
   senderId?: Prisma.StringWithAggregatesFilter<"Message"> | string
 }
@@ -298,67 +313,76 @@ export type MessageCreateInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   chat: Prisma.ChatCreateNestedOneWithoutMessagesInput
   sender: Prisma.UserCreateNestedOneWithoutMessagesInput
   media?: Prisma.MediaCreateNestedManyWithoutMessageInput
+  statuses?: Prisma.MessageStatusCreateNestedManyWithoutMessageInput
 }
 
 export type MessageUncheckedCreateInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   chatId: string
   senderId: string
   media?: Prisma.MediaUncheckedCreateNestedManyWithoutMessageInput
+  statuses?: Prisma.MessageStatusUncheckedCreateNestedManyWithoutMessageInput
 }
 
 export type MessageUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chat?: Prisma.ChatUpdateOneRequiredWithoutMessagesNestedInput
   sender?: Prisma.UserUpdateOneRequiredWithoutMessagesNestedInput
   media?: Prisma.MediaUpdateManyWithoutMessageNestedInput
+  statuses?: Prisma.MessageStatusUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chatId?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   media?: Prisma.MediaUncheckedUpdateManyWithoutMessageNestedInput
+  statuses?: Prisma.MessageStatusUncheckedUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageCreateManyInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   chatId: string
   senderId: string
 }
@@ -367,22 +391,24 @@ export type MessageUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type MessageUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chatId?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
 }
@@ -401,11 +427,12 @@ export type MessageCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   content?: Prisma.SortOrder
   pinnedByUserId?: Prisma.SortOrder
-  status?: Prisma.SortOrder
   replyToId?: Prisma.SortOrder
   forwardedFromId?: Prisma.SortOrder
+  isEdited?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   chatId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
 }
@@ -414,11 +441,12 @@ export type MessageMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   content?: Prisma.SortOrder
   pinnedByUserId?: Prisma.SortOrder
-  status?: Prisma.SortOrder
   replyToId?: Prisma.SortOrder
   forwardedFromId?: Prisma.SortOrder
+  isEdited?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   chatId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
 }
@@ -427,11 +455,12 @@ export type MessageMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   content?: Prisma.SortOrder
   pinnedByUserId?: Prisma.SortOrder
-  status?: Prisma.SortOrder
   replyToId?: Prisma.SortOrder
   forwardedFromId?: Prisma.SortOrder
+  isEdited?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   chatId?: Prisma.SortOrder
   senderId?: Prisma.SortOrder
 }
@@ -525,8 +554,18 @@ export type MessageUncheckedUpdateManyWithoutChatNestedInput = {
   deleteMany?: Prisma.MessageScalarWhereInput | Prisma.MessageScalarWhereInput[]
 }
 
-export type EnumEnumMessageStatusFieldUpdateOperationsInput = {
-  set?: $Enums.EnumMessageStatus
+export type MessageCreateNestedOneWithoutStatusesInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutStatusesInput, Prisma.MessageUncheckedCreateWithoutStatusesInput>
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutStatusesInput
+  connect?: Prisma.MessageWhereUniqueInput
+}
+
+export type MessageUpdateOneRequiredWithoutStatusesNestedInput = {
+  create?: Prisma.XOR<Prisma.MessageCreateWithoutStatusesInput, Prisma.MessageUncheckedCreateWithoutStatusesInput>
+  connectOrCreate?: Prisma.MessageCreateOrConnectWithoutStatusesInput
+  upsert?: Prisma.MessageUpsertWithoutStatusesInput
+  connect?: Prisma.MessageWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MessageUpdateToOneWithWhereWithoutStatusesInput, Prisma.MessageUpdateWithoutStatusesInput>, Prisma.MessageUncheckedUpdateWithoutStatusesInput>
 }
 
 export type MessageCreateNestedOneWithoutMediaInput = {
@@ -547,26 +586,30 @@ export type MessageCreateWithoutSenderInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   chat: Prisma.ChatCreateNestedOneWithoutMessagesInput
   media?: Prisma.MediaCreateNestedManyWithoutMessageInput
+  statuses?: Prisma.MessageStatusCreateNestedManyWithoutMessageInput
 }
 
 export type MessageUncheckedCreateWithoutSenderInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   chatId: string
   media?: Prisma.MediaUncheckedCreateNestedManyWithoutMessageInput
+  statuses?: Prisma.MessageStatusUncheckedCreateNestedManyWithoutMessageInput
 }
 
 export type MessageCreateOrConnectWithoutSenderInput = {
@@ -602,11 +645,12 @@ export type MessageScalarWhereInput = {
   id?: Prisma.StringFilter<"Message"> | string
   content?: Prisma.StringNullableFilter<"Message"> | string | null
   pinnedByUserId?: Prisma.StringNullableFilter<"Message"> | string | null
-  status?: Prisma.EnumEnumMessageStatusFilter<"Message"> | $Enums.EnumMessageStatus
   replyToId?: Prisma.StringNullableFilter<"Message"> | string | null
   forwardedFromId?: Prisma.StringNullableFilter<"Message"> | string | null
+  isEdited?: Prisma.BoolFilter<"Message"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Message"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Message"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Message"> | Date | string | null
   chatId?: Prisma.StringFilter<"Message"> | string
   senderId?: Prisma.StringFilter<"Message"> | string
 }
@@ -615,26 +659,30 @@ export type MessageCreateWithoutChatInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   sender: Prisma.UserCreateNestedOneWithoutMessagesInput
   media?: Prisma.MediaCreateNestedManyWithoutMessageInput
+  statuses?: Prisma.MessageStatusCreateNestedManyWithoutMessageInput
 }
 
 export type MessageUncheckedCreateWithoutChatInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   senderId: string
   media?: Prisma.MediaUncheckedCreateNestedManyWithoutMessageInput
+  statuses?: Prisma.MessageStatusUncheckedCreateNestedManyWithoutMessageInput
 }
 
 export type MessageCreateOrConnectWithoutChatInput = {
@@ -663,30 +711,110 @@ export type MessageUpdateManyWithWhereWithoutChatInput = {
   data: Prisma.XOR<Prisma.MessageUpdateManyMutationInput, Prisma.MessageUncheckedUpdateManyWithoutChatInput>
 }
 
+export type MessageCreateWithoutStatusesInput = {
+  id?: string
+  content?: string | null
+  pinnedByUserId?: string | null
+  replyToId?: string | null
+  forwardedFromId?: string | null
+  isEdited?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  chat: Prisma.ChatCreateNestedOneWithoutMessagesInput
+  sender: Prisma.UserCreateNestedOneWithoutMessagesInput
+  media?: Prisma.MediaCreateNestedManyWithoutMessageInput
+}
+
+export type MessageUncheckedCreateWithoutStatusesInput = {
+  id?: string
+  content?: string | null
+  pinnedByUserId?: string | null
+  replyToId?: string | null
+  forwardedFromId?: string | null
+  isEdited?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  chatId: string
+  senderId: string
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutMessageInput
+}
+
+export type MessageCreateOrConnectWithoutStatusesInput = {
+  where: Prisma.MessageWhereUniqueInput
+  create: Prisma.XOR<Prisma.MessageCreateWithoutStatusesInput, Prisma.MessageUncheckedCreateWithoutStatusesInput>
+}
+
+export type MessageUpsertWithoutStatusesInput = {
+  update: Prisma.XOR<Prisma.MessageUpdateWithoutStatusesInput, Prisma.MessageUncheckedUpdateWithoutStatusesInput>
+  create: Prisma.XOR<Prisma.MessageCreateWithoutStatusesInput, Prisma.MessageUncheckedCreateWithoutStatusesInput>
+  where?: Prisma.MessageWhereInput
+}
+
+export type MessageUpdateToOneWithWhereWithoutStatusesInput = {
+  where?: Prisma.MessageWhereInput
+  data: Prisma.XOR<Prisma.MessageUpdateWithoutStatusesInput, Prisma.MessageUncheckedUpdateWithoutStatusesInput>
+}
+
+export type MessageUpdateWithoutStatusesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  chat?: Prisma.ChatUpdateOneRequiredWithoutMessagesNestedInput
+  sender?: Prisma.UserUpdateOneRequiredWithoutMessagesNestedInput
+  media?: Prisma.MediaUpdateManyWithoutMessageNestedInput
+}
+
+export type MessageUncheckedUpdateWithoutStatusesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  chatId?: Prisma.StringFieldUpdateOperationsInput | string
+  senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  media?: Prisma.MediaUncheckedUpdateManyWithoutMessageNestedInput
+}
+
 export type MessageCreateWithoutMediaInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   chat: Prisma.ChatCreateNestedOneWithoutMessagesInput
   sender: Prisma.UserCreateNestedOneWithoutMessagesInput
+  statuses?: Prisma.MessageStatusCreateNestedManyWithoutMessageInput
 }
 
 export type MessageUncheckedCreateWithoutMediaInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   chatId: string
   senderId: string
+  statuses?: Prisma.MessageStatusUncheckedCreateNestedManyWithoutMessageInput
 }
 
 export type MessageCreateOrConnectWithoutMediaInput = {
@@ -709,37 +837,42 @@ export type MessageUpdateWithoutMediaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chat?: Prisma.ChatUpdateOneRequiredWithoutMessagesNestedInput
   sender?: Prisma.UserUpdateOneRequiredWithoutMessagesNestedInput
+  statuses?: Prisma.MessageStatusUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutMediaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chatId?: Prisma.StringFieldUpdateOperationsInput | string
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
+  statuses?: Prisma.MessageStatusUncheckedUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageCreateManySenderInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   chatId: string
 }
 
@@ -747,37 +880,42 @@ export type MessageUpdateWithoutSenderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chat?: Prisma.ChatUpdateOneRequiredWithoutMessagesNestedInput
   media?: Prisma.MediaUpdateManyWithoutMessageNestedInput
+  statuses?: Prisma.MessageStatusUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutSenderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chatId?: Prisma.StringFieldUpdateOperationsInput | string
   media?: Prisma.MediaUncheckedUpdateManyWithoutMessageNestedInput
+  statuses?: Prisma.MessageStatusUncheckedUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutSenderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   chatId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -785,11 +923,12 @@ export type MessageCreateManyChatInput = {
   id?: string
   content?: string | null
   pinnedByUserId?: string | null
-  status?: $Enums.EnumMessageStatus
   replyToId?: string | null
   forwardedFromId?: string | null
+  isEdited?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   senderId: string
 }
 
@@ -797,37 +936,42 @@ export type MessageUpdateWithoutChatInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sender?: Prisma.UserUpdateOneRequiredWithoutMessagesNestedInput
   media?: Prisma.MediaUpdateManyWithoutMessageNestedInput
+  statuses?: Prisma.MessageStatusUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageUncheckedUpdateWithoutChatInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
   media?: Prisma.MediaUncheckedUpdateManyWithoutMessageNestedInput
+  statuses?: Prisma.MessageStatusUncheckedUpdateManyWithoutMessageNestedInput
 }
 
 export type MessageUncheckedUpdateManyWithoutChatInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedByUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  status?: Prisma.EnumEnumMessageStatusFieldUpdateOperationsInput | $Enums.EnumMessageStatus
   replyToId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   forwardedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isEdited?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   senderId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -838,10 +982,12 @@ export type MessageUncheckedUpdateManyWithoutChatInput = {
 
 export type MessageCountOutputType = {
   media: number
+  statuses: number
 }
 
 export type MessageCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   media?: boolean | MessageCountOutputTypeCountMediaArgs
+  statuses?: boolean | MessageCountOutputTypeCountStatusesArgs
 }
 
 /**
@@ -861,21 +1007,30 @@ export type MessageCountOutputTypeCountMediaArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.MediaWhereInput
 }
 
+/**
+ * MessageCountOutputType without action
+ */
+export type MessageCountOutputTypeCountStatusesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MessageStatusWhereInput
+}
+
 
 export type MessageSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   content?: boolean
   pinnedByUserId?: boolean
-  status?: boolean
   replyToId?: boolean
   forwardedFromId?: boolean
+  isEdited?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   chatId?: boolean
   senderId?: boolean
   chat?: boolean | Prisma.ChatDefaultArgs<ExtArgs>
   sender?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   media?: boolean | Prisma.Message$mediaArgs<ExtArgs>
+  statuses?: boolean | Prisma.Message$statusesArgs<ExtArgs>
   _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["message"]>
 
@@ -883,11 +1038,12 @@ export type MessageSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   content?: boolean
   pinnedByUserId?: boolean
-  status?: boolean
   replyToId?: boolean
   forwardedFromId?: boolean
+  isEdited?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   chatId?: boolean
   senderId?: boolean
   chat?: boolean | Prisma.ChatDefaultArgs<ExtArgs>
@@ -898,11 +1054,12 @@ export type MessageSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   content?: boolean
   pinnedByUserId?: boolean
-  status?: boolean
   replyToId?: boolean
   forwardedFromId?: boolean
+  isEdited?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   chatId?: boolean
   senderId?: boolean
   chat?: boolean | Prisma.ChatDefaultArgs<ExtArgs>
@@ -913,20 +1070,22 @@ export type MessageSelectScalar = {
   id?: boolean
   content?: boolean
   pinnedByUserId?: boolean
-  status?: boolean
   replyToId?: boolean
   forwardedFromId?: boolean
+  isEdited?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   chatId?: boolean
   senderId?: boolean
 }
 
-export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "content" | "pinnedByUserId" | "status" | "replyToId" | "forwardedFromId" | "createdAt" | "updatedAt" | "chatId" | "senderId", ExtArgs["result"]["message"]>
+export type MessageOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "content" | "pinnedByUserId" | "replyToId" | "forwardedFromId" | "isEdited" | "createdAt" | "updatedAt" | "deletedAt" | "chatId" | "senderId", ExtArgs["result"]["message"]>
 export type MessageInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chat?: boolean | Prisma.ChatDefaultArgs<ExtArgs>
   sender?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   media?: boolean | Prisma.Message$mediaArgs<ExtArgs>
+  statuses?: boolean | Prisma.Message$statusesArgs<ExtArgs>
   _count?: boolean | Prisma.MessageCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MessageIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -944,16 +1103,18 @@ export type $MessagePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     chat: Prisma.$ChatPayload<ExtArgs>
     sender: Prisma.$UserPayload<ExtArgs>
     media: Prisma.$MediaPayload<ExtArgs>[]
+    statuses: Prisma.$MessageStatusPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     content: string | null
     pinnedByUserId: string | null
-    status: $Enums.EnumMessageStatus
     replyToId: string | null
     forwardedFromId: string | null
+    isEdited: boolean
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
     chatId: string
     senderId: string
   }, ExtArgs["result"]["message"]>
@@ -1353,6 +1514,7 @@ export interface Prisma__MessageClient<T, Null = never, ExtArgs extends runtime.
   chat<T extends Prisma.ChatDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ChatDefaultArgs<ExtArgs>>): Prisma.Prisma__ChatClient<runtime.Types.Result.GetResult<Prisma.$ChatPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   sender<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   media<T extends Prisma.Message$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  statuses<T extends Prisma.Message$statusesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Message$statusesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessageStatusPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1385,11 +1547,12 @@ export interface MessageFieldRefs {
   readonly id: Prisma.FieldRef<"Message", 'String'>
   readonly content: Prisma.FieldRef<"Message", 'String'>
   readonly pinnedByUserId: Prisma.FieldRef<"Message", 'String'>
-  readonly status: Prisma.FieldRef<"Message", 'EnumMessageStatus'>
   readonly replyToId: Prisma.FieldRef<"Message", 'String'>
   readonly forwardedFromId: Prisma.FieldRef<"Message", 'String'>
+  readonly isEdited: Prisma.FieldRef<"Message", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Message", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"Message", 'DateTime'>
   readonly chatId: Prisma.FieldRef<"Message", 'String'>
   readonly senderId: Prisma.FieldRef<"Message", 'String'>
 }
@@ -1809,6 +1972,30 @@ export type Message$mediaArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.MediaScalarFieldEnum | Prisma.MediaScalarFieldEnum[]
+}
+
+/**
+ * Message.statuses
+ */
+export type Message$statusesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MessageStatus
+   */
+  select?: Prisma.MessageStatusSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MessageStatus
+   */
+  omit?: Prisma.MessageStatusOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MessageStatusInclude<ExtArgs> | null
+  where?: Prisma.MessageStatusWhereInput
+  orderBy?: Prisma.MessageStatusOrderByWithRelationInput | Prisma.MessageStatusOrderByWithRelationInput[]
+  cursor?: Prisma.MessageStatusWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MessageStatusScalarFieldEnum | Prisma.MessageStatusScalarFieldEnum[]
 }
 
 /**

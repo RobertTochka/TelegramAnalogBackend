@@ -6,6 +6,8 @@ import { EmailConfirmationModule } from './auth/email-confirmation/email-confirm
 import { IS_DEV_ENV } from './libs/common/utils'
 import { MailModule } from './libs/mail/mail.module'
 import { UserModule } from './user/user.module'
+import { MessageModule } from './message/message.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { UserModule } from './user/user.module'
     MailModule,
     UserModule,
     AuthModule,
-    EmailConfirmationModule
+    EmailConfirmationModule,
+    MessageModule,
+    ChatModule
   ]
 })
 export class AppModule {}

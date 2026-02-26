@@ -63,7 +63,8 @@ export const EnumMessageStatus = {
   SENT: 'SENT',
   DELIVERED: 'DELIVERED',
   READ: 'READ',
-  FAILED: 'FAILED'
+  FAILED: 'FAILED',
+  DELETED: 'DELETED'
 } as const
 
 export type EnumMessageStatus = (typeof EnumMessageStatus)[keyof typeof EnumMessageStatus]

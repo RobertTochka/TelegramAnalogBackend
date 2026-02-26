@@ -56,6 +56,7 @@ export const ModelName = {
   ChatMember: 'ChatMember',
   ChatAdmin: 'ChatAdmin',
   Message: 'Message',
+  MessageStatus: 'MessageStatus',
   Media: 'Media',
   ArchivedChat: 'ArchivedChat',
   PinnedChat: 'PinnedChat',
@@ -96,7 +97,8 @@ export const UserScalarFieldEnum = {
   visibility: 'visibility',
   lastSeen: 'lastSeen',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -113,6 +115,7 @@ export const ChatScalarFieldEnum = {
   lastMessageId: 'lastMessageId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
   createdById: 'createdById'
 } as const
 
@@ -144,16 +147,28 @@ export const MessageScalarFieldEnum = {
   id: 'id',
   content: 'content',
   pinnedByUserId: 'pinnedByUserId',
-  status: 'status',
   replyToId: 'replyToId',
   forwardedFromId: 'forwardedFromId',
+  isEdited: 'isEdited',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
   chatId: 'chatId',
   senderId: 'senderId'
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const MessageStatusScalarFieldEnum = {
+  id: 'id',
+  status: 'status',
+  updatedAt: 'updatedAt',
+  messageId: 'messageId',
+  userId: 'userId'
+} as const
+
+export type MessageStatusScalarFieldEnum = (typeof MessageStatusScalarFieldEnum)[keyof typeof MessageStatusScalarFieldEnum]
 
 
 export const MediaScalarFieldEnum = {

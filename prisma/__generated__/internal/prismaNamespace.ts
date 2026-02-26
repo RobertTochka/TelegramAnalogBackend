@@ -389,6 +389,7 @@ export const ModelName = {
   ChatMember: 'ChatMember',
   ChatAdmin: 'ChatAdmin',
   Message: 'Message',
+  MessageStatus: 'MessageStatus',
   Media: 'Media',
   ArchivedChat: 'ArchivedChat',
   PinnedChat: 'PinnedChat',
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "chat" | "chatMember" | "chatAdmin" | "message" | "media" | "archivedChat" | "pinnedChat" | "mutedChat" | "token"
+    modelProps: "user" | "chat" | "chatMember" | "chatAdmin" | "message" | "messageStatus" | "media" | "archivedChat" | "pinnedChat" | "mutedChat" | "token"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -780,6 +781,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.MessageCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.MessageCountAggregateOutputType> | number
+        }
+      }
+    }
+    MessageStatus: {
+      payload: Prisma.$MessageStatusPayload<ExtArgs>
+      fields: Prisma.MessageStatusFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MessageStatusFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MessageStatusFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload>
+        }
+        findFirst: {
+          args: Prisma.MessageStatusFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MessageStatusFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload>
+        }
+        findMany: {
+          args: Prisma.MessageStatusFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload>[]
+        }
+        create: {
+          args: Prisma.MessageStatusCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload>
+        }
+        createMany: {
+          args: Prisma.MessageStatusCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MessageStatusCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload>[]
+        }
+        delete: {
+          args: Prisma.MessageStatusDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload>
+        }
+        update: {
+          args: Prisma.MessageStatusUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload>
+        }
+        deleteMany: {
+          args: Prisma.MessageStatusDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MessageStatusUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MessageStatusUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload>[]
+        }
+        upsert: {
+          args: Prisma.MessageStatusUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageStatusPayload>
+        }
+        aggregate: {
+          args: Prisma.MessageStatusAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMessageStatus>
+        }
+        groupBy: {
+          args: Prisma.MessageStatusGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MessageStatusGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MessageStatusCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MessageStatusCountAggregateOutputType> | number
         }
       }
     }
@@ -1209,7 +1284,8 @@ export const UserScalarFieldEnum = {
   visibility: 'visibility',
   lastSeen: 'lastSeen',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1226,6 +1302,7 @@ export const ChatScalarFieldEnum = {
   lastMessageId: 'lastMessageId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
   createdById: 'createdById'
 } as const
 
@@ -1257,16 +1334,28 @@ export const MessageScalarFieldEnum = {
   id: 'id',
   content: 'content',
   pinnedByUserId: 'pinnedByUserId',
-  status: 'status',
   replyToId: 'replyToId',
   forwardedFromId: 'forwardedFromId',
+  isEdited: 'isEdited',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
   chatId: 'chatId',
   senderId: 'senderId'
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const MessageStatusScalarFieldEnum = {
+  id: 'id',
+  status: 'status',
+  updatedAt: 'updatedAt',
+  messageId: 'messageId',
+  userId: 'userId'
+} as const
+
+export type MessageStatusScalarFieldEnum = (typeof MessageStatusScalarFieldEnum)[keyof typeof MessageStatusScalarFieldEnum]
 
 
 export const MediaScalarFieldEnum = {
@@ -1629,6 +1718,7 @@ export type GlobalOmitConfig = {
   chatMember?: Prisma.ChatMemberOmit
   chatAdmin?: Prisma.ChatAdminOmit
   message?: Prisma.MessageOmit
+  messageStatus?: Prisma.MessageStatusOmit
   media?: Prisma.MediaOmit
   archivedChat?: Prisma.ArchivedChatOmit
   pinnedChat?: Prisma.PinnedChatOmit
