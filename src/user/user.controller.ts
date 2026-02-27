@@ -4,7 +4,9 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Patch,
+  Post,
   Query
 } from '@nestjs/common'
 import { EnumUserRole } from '@prisma/__generated__/enums'
@@ -50,5 +52,41 @@ export class UserController {
     @Body() dto: ChangePasswordDto
   ) {
     return this.userService.changePassword(userId, dto)
+  }
+
+  //#region friends
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Post('friends/add/:friendId')
+  public async sendFriendRequest(
+    @Authorized('id') userId: string,
+    @Param('friendId') friendId: string
+  ) {
+    return this.userService.sendFriendRequest(userId, friendId)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Post('friends/accept/:friendId')
+  public async acceptFriendRequest(
+    @Authorized('id') userId: string,
+    @Param('friendId') friendId: string
+  ) {
+    return this.userService.acceptFriendRequest(userId, friendId)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Get('friends/list')
+  public async getFriends(@Authorized('id') userId: string) {
+    return this.userService.getFriends(userId)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Get('friends/requests')
+  public async getFriendRequests(@Authorized('id') userId: string) {
+    return this.userService.getFriendRequests(userId)
   }
 }

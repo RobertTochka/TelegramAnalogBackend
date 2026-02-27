@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common'
+import { EnumFriendshipStatus } from '@prisma/__generated__/enums'
 import { hash, verify } from 'argon2'
 
 import { PrismaService } from '@/prisma.service'
@@ -11,6 +12,7 @@ import { PrismaService } from '@/prisma.service'
 import {
   ChangePasswordDto,
   CreateUserDto,
+  FriendRequestsResponseDto,
   SearchUsersDto,
   UpdateUserDto
 } from './dto'
@@ -161,6 +163,174 @@ export class UserService {
       },
       data: {
         password: newPassword
+      }
+    })
+  }
+
+  //#region friends
+
+  // Отправить запрос в друзья
+  public async sendFriendRequest(userId: string, friendId: string) {
+    if (userId === friendId) {
+      throw new ConflictException('Нельзя добавить самого себя в друзья')
+    }
+
+    const friend = await this.prismaService.user.findUnique({
+      where: { id: friendId }
+    })
+
+    if (!friend) {
+      throw new NotFoundException('Пользователь не найден')
+    }
+
+    const existingFriendship = await this.prismaService.friendship.findUnique({
+      where: {
+        userId_friendId: {
+          userId,
+          friendId
+        }
+      }
+    })
+
+    if (existingFriendship) {
+      throw new ConflictException('Пользователь уже в друзьях')
+    }
+
+    const friendship = await this.prismaService.friendship.create({
+      data: {
+        userId,
+        friendId,
+        status: EnumFriendshipStatus.PENDING
+      },
+      include: {
+        friend: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true
+          }
+        }
+      }
+    })
+
+    return friendship
+  }
+
+  // Принять запрос в друзья
+  async acceptFriendRequest(userId: string, friendId: string) {
+    return this.prismaService.friendship.update({
+      where: {
+        userId_friendId: {
+          userId: friendId, // Тот, кто отправил запрос
+          friendId: userId // Тот, кто принимает
+        }
+      },
+      data: {
+        status: EnumFriendshipStatus.ACCEPTED
+      }
+    })
+  }
+
+  // Получить список друзей пользователя
+  async getFriends(userId: string) {
+    const friendships = await this.prismaService.friendship.findMany({
+      where: {
+        OR: [
+          { userId, status: EnumFriendshipStatus.ACCEPTED },
+          { friendId: userId, status: EnumFriendshipStatus.ACCEPTED }
+        ]
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            status: true,
+            lastSeen: true
+          }
+        },
+        friend: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            status: true,
+            lastSeen: true
+          }
+        }
+      }
+    })
+
+    return friendships.map(f => (f.userId === userId ? f.friend : f.user))
+  }
+
+  // Получить все запросы в друзья
+  async getFriendRequests(userId: string) {
+    const incomingRequests = await this.prismaService.friendship.findMany({
+      where: {
+        friendId: userId,
+        status: EnumFriendshipStatus.PENDING
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true
+          }
+        }
+      }
+    })
+
+    const outgoingRequests = await this.prismaService.friendship.findMany({
+      where: {
+        userId,
+        status: EnumFriendshipStatus.PENDING
+      },
+      include: {
+        friend: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true
+          }
+        }
+      }
+    })
+
+    const requests: FriendRequestsResponseDto = {
+      incomingRequests,
+      outgoingRequests
+    }
+
+    return requests
+  }
+
+  // Удалить из друзей / отклонить запрос
+  async removeFriend(userId: string, friendId: string) {
+    const friendship = await this.prismaService.friendship.findFirst({
+      where: {
+        OR: [
+          { userId, friendId },
+          { userId: friendId, friendId: userId }
+        ]
+      }
+    })
+
+    if (!friendship) {
+      throw new Error('Дружба не найдена')
+    }
+
+    return this.prismaService.friendship.delete({
+      where: {
+        id: friendship.id
       }
     })
   }

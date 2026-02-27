@@ -9,6 +9,7 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/User'
+export type * from './models/Friendship'
 export type * from './models/Chat'
 export type * from './models/ChatMember'
 export type * from './models/ChatAdmin'

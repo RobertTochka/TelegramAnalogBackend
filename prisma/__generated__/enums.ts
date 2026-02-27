@@ -80,3 +80,13 @@ export const EnumMediaType = {
 } as const
 
 export type EnumMediaType = (typeof EnumMediaType)[keyof typeof EnumMediaType]
+
+
+export const EnumFriendshipStatus = {
+  PENDING: 'PENDING',
+  ACCEPTED: 'ACCEPTED',
+  DECLINED: 'DECLINED',
+  BLOCKED: 'BLOCKED'
+} as const
+
+export type EnumFriendshipStatus = (typeof EnumFriendshipStatus)[keyof typeof EnumFriendshipStatus]

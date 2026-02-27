@@ -35,11 +35,31 @@ model User {
     pinnedChats   PinnedChat[]
     chatAdmins    ChatAdmin[]
     messageStatus MessageStatus[]
+    friendships   Friendship[]    @relation("UserFriends")
+    friendOf      Friendship[]    @relation("FriendOf")
 
     @@index([email])
     @@index([username])
     @@index([phone])
     @@map("users")
+}
+
+model Friendship {
+    id        String               @id @default(cuid())
+    status    EnumFriendshipStatus @default(PENDING)
+    createdAt DateTime             @default(now()) @map("created_at")
+    updatedAt DateTime             @updatedAt @map("updated_at")
+
+    user     User   @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
+    userId   String @map("user_id")
+    friend   User   @relation("FriendOf", fields: [friendId], references: [id], onDelete: Cascade)
+    friendId String @map("friend_id")
+
+    @@unique([userId, friendId])
+    @@index([userId])
+    @@index([friendId])
+    @@index([status])
+    @@map("friendships")
 }
 
 model Chat {
@@ -256,4 +276,11 @@ enum EnumMediaType {
     DOCUMENT
     VOICE
     GIF
+}
+
+enum EnumFriendshipStatus {
+    PENDING
+    ACCEPTED
+    DECLINED
+    BLOCKED
 }
