@@ -224,7 +224,7 @@ export type PinnedChatCreateInput = {
   id?: string
   pinnedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutPinnedChatsInput
-  chat: Prisma.ChatCreateNestedOneWithoutPinnedByInput
+  chat: Prisma.ChatCreateNestedOneWithoutPinnedChatsInput
 }
 
 export type PinnedChatUncheckedCreateInput = {
@@ -238,7 +238,7 @@ export type PinnedChatUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pinnedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutPinnedChatsNestedInput
-  chat?: Prisma.ChatUpdateOneRequiredWithoutPinnedByNestedInput
+  chat?: Prisma.ChatUpdateOneRequiredWithoutPinnedChatsNestedInput
 }
 
 export type PinnedChatUncheckedUpdateInput = {
@@ -390,7 +390,7 @@ export type PinnedChatUncheckedUpdateManyWithoutChatNestedInput = {
 export type PinnedChatCreateWithoutUserInput = {
   id?: string
   pinnedAt?: Date | string
-  chat: Prisma.ChatCreateNestedOneWithoutPinnedByInput
+  chat: Prisma.ChatCreateNestedOneWithoutPinnedChatsInput
 }
 
 export type PinnedChatUncheckedCreateWithoutUserInput = {
@@ -482,7 +482,7 @@ export type PinnedChatCreateManyUserInput = {
 export type PinnedChatUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pinnedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  chat?: Prisma.ChatUpdateOneRequiredWithoutPinnedByNestedInput
+  chat?: Prisma.ChatUpdateOneRequiredWithoutPinnedChatsNestedInput
 }
 
 export type PinnedChatUncheckedUpdateWithoutUserInput = {

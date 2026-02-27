@@ -29,10 +29,11 @@ export type ChatMinAggregateOutputType = {
   name: string | null
   description: string | null
   avatar: string | null
-  isPrivate: boolean | null
-  type: $Enums.EnumChatType | null
+  inviteLink: string | null
   pinnedMessageId: string | null
   lastMessageId: string | null
+  isPrivate: boolean | null
+  type: $Enums.EnumChatType | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -44,10 +45,11 @@ export type ChatMaxAggregateOutputType = {
   name: string | null
   description: string | null
   avatar: string | null
-  isPrivate: boolean | null
-  type: $Enums.EnumChatType | null
+  inviteLink: string | null
   pinnedMessageId: string | null
   lastMessageId: string | null
+  isPrivate: boolean | null
+  type: $Enums.EnumChatType | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -59,10 +61,11 @@ export type ChatCountAggregateOutputType = {
   name: number
   description: number
   avatar: number
-  isPrivate: number
-  type: number
+  inviteLink: number
   pinnedMessageId: number
   lastMessageId: number
+  isPrivate: number
+  type: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -76,10 +79,11 @@ export type ChatMinAggregateInputType = {
   name?: true
   description?: true
   avatar?: true
-  isPrivate?: true
-  type?: true
+  inviteLink?: true
   pinnedMessageId?: true
   lastMessageId?: true
+  isPrivate?: true
+  type?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -91,10 +95,11 @@ export type ChatMaxAggregateInputType = {
   name?: true
   description?: true
   avatar?: true
-  isPrivate?: true
-  type?: true
+  inviteLink?: true
   pinnedMessageId?: true
   lastMessageId?: true
+  isPrivate?: true
+  type?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -106,10 +111,11 @@ export type ChatCountAggregateInputType = {
   name?: true
   description?: true
   avatar?: true
-  isPrivate?: true
-  type?: true
+  inviteLink?: true
   pinnedMessageId?: true
   lastMessageId?: true
+  isPrivate?: true
+  type?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -194,10 +200,11 @@ export type ChatGroupByOutputType = {
   name: string
   description: string | null
   avatar: string | null
-  isPrivate: boolean
-  type: $Enums.EnumChatType
+  inviteLink: string | null
   pinnedMessageId: string | null
   lastMessageId: string | null
+  isPrivate: boolean
+  type: $Enums.EnumChatType
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -230,10 +237,11 @@ export type ChatWhereInput = {
   name?: Prisma.StringFilter<"Chat"> | string
   description?: Prisma.StringNullableFilter<"Chat"> | string | null
   avatar?: Prisma.StringNullableFilter<"Chat"> | string | null
-  isPrivate?: Prisma.BoolFilter<"Chat"> | boolean
-  type?: Prisma.EnumEnumChatTypeFilter<"Chat"> | $Enums.EnumChatType
+  inviteLink?: Prisma.StringNullableFilter<"Chat"> | string | null
   pinnedMessageId?: Prisma.StringNullableFilter<"Chat"> | string | null
   lastMessageId?: Prisma.StringNullableFilter<"Chat"> | string | null
+  isPrivate?: Prisma.BoolFilter<"Chat"> | boolean
+  type?: Prisma.EnumEnumChatTypeFilter<"Chat"> | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFilter<"Chat"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Chat"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Chat"> | Date | string | null
@@ -243,7 +251,7 @@ export type ChatWhereInput = {
   admins?: Prisma.ChatAdminListRelationFilter
   archivedBy?: Prisma.ArchivedChatListRelationFilter
   mutedBy?: Prisma.MutedChatListRelationFilter
-  pinnedBy?: Prisma.PinnedChatListRelationFilter
+  pinnedChats?: Prisma.PinnedChatListRelationFilter
   messages?: Prisma.MessageListRelationFilter
 }
 
@@ -252,10 +260,11 @@ export type ChatOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  inviteLink?: Prisma.SortOrderInput | Prisma.SortOrder
   pinnedMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -265,22 +274,23 @@ export type ChatOrderByWithRelationInput = {
   admins?: Prisma.ChatAdminOrderByRelationAggregateInput
   archivedBy?: Prisma.ArchivedChatOrderByRelationAggregateInput
   mutedBy?: Prisma.MutedChatOrderByRelationAggregateInput
-  pinnedBy?: Prisma.PinnedChatOrderByRelationAggregateInput
+  pinnedChats?: Prisma.PinnedChatOrderByRelationAggregateInput
   messages?: Prisma.MessageOrderByRelationAggregateInput
 }
 
 export type ChatWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  inviteLink?: string
   AND?: Prisma.ChatWhereInput | Prisma.ChatWhereInput[]
   OR?: Prisma.ChatWhereInput[]
   NOT?: Prisma.ChatWhereInput | Prisma.ChatWhereInput[]
   name?: Prisma.StringFilter<"Chat"> | string
   description?: Prisma.StringNullableFilter<"Chat"> | string | null
   avatar?: Prisma.StringNullableFilter<"Chat"> | string | null
-  isPrivate?: Prisma.BoolFilter<"Chat"> | boolean
-  type?: Prisma.EnumEnumChatTypeFilter<"Chat"> | $Enums.EnumChatType
   pinnedMessageId?: Prisma.StringNullableFilter<"Chat"> | string | null
   lastMessageId?: Prisma.StringNullableFilter<"Chat"> | string | null
+  isPrivate?: Prisma.BoolFilter<"Chat"> | boolean
+  type?: Prisma.EnumEnumChatTypeFilter<"Chat"> | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFilter<"Chat"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Chat"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Chat"> | Date | string | null
@@ -290,19 +300,20 @@ export type ChatWhereUniqueInput = Prisma.AtLeast<{
   admins?: Prisma.ChatAdminListRelationFilter
   archivedBy?: Prisma.ArchivedChatListRelationFilter
   mutedBy?: Prisma.MutedChatListRelationFilter
-  pinnedBy?: Prisma.PinnedChatListRelationFilter
+  pinnedChats?: Prisma.PinnedChatListRelationFilter
   messages?: Prisma.MessageListRelationFilter
-}, "id">
+}, "id" | "inviteLink">
 
 export type ChatOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  inviteLink?: Prisma.SortOrderInput | Prisma.SortOrder
   pinnedMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
   lastMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -320,10 +331,11 @@ export type ChatScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Chat"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Chat"> | string | null
   avatar?: Prisma.StringNullableWithAggregatesFilter<"Chat"> | string | null
-  isPrivate?: Prisma.BoolWithAggregatesFilter<"Chat"> | boolean
-  type?: Prisma.EnumEnumChatTypeWithAggregatesFilter<"Chat"> | $Enums.EnumChatType
+  inviteLink?: Prisma.StringNullableWithAggregatesFilter<"Chat"> | string | null
   pinnedMessageId?: Prisma.StringNullableWithAggregatesFilter<"Chat"> | string | null
   lastMessageId?: Prisma.StringNullableWithAggregatesFilter<"Chat"> | string | null
+  isPrivate?: Prisma.BoolWithAggregatesFilter<"Chat"> | boolean
+  type?: Prisma.EnumEnumChatTypeWithAggregatesFilter<"Chat"> | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Chat"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Chat"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Chat"> | Date | string | null
@@ -335,10 +347,11 @@ export type ChatCreateInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -347,7 +360,7 @@ export type ChatCreateInput = {
   admins?: Prisma.ChatAdminCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageCreateNestedManyWithoutChatInput
 }
 
@@ -356,10 +369,11 @@ export type ChatUncheckedCreateInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -368,7 +382,7 @@ export type ChatUncheckedCreateInput = {
   admins?: Prisma.ChatAdminUncheckedCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatUncheckedCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatUncheckedCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutChatInput
 }
 
@@ -377,10 +391,11 @@ export type ChatUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -389,7 +404,7 @@ export type ChatUpdateInput = {
   admins?: Prisma.ChatAdminUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUpdateManyWithoutChatNestedInput
 }
 
@@ -398,10 +413,11 @@ export type ChatUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -410,7 +426,7 @@ export type ChatUncheckedUpdateInput = {
   admins?: Prisma.ChatAdminUncheckedUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUncheckedUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUncheckedUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutChatNestedInput
 }
 
@@ -419,10 +435,11 @@ export type ChatCreateManyInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -434,10 +451,11 @@ export type ChatUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -448,10 +466,11 @@ export type ChatUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -473,10 +492,11 @@ export type ChatCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  inviteLink?: Prisma.SortOrder
   pinnedMessageId?: Prisma.SortOrder
   lastMessageId?: Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -488,10 +508,11 @@ export type ChatMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  inviteLink?: Prisma.SortOrder
   pinnedMessageId?: Prisma.SortOrder
   lastMessageId?: Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -503,10 +524,11 @@ export type ChatMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
-  isPrivate?: Prisma.SortOrder
-  type?: Prisma.SortOrder
+  inviteLink?: Prisma.SortOrder
   pinnedMessageId?: Prisma.SortOrder
   lastMessageId?: Prisma.SortOrder
+  isPrivate?: Prisma.SortOrder
+  type?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -620,18 +642,18 @@ export type ChatUpdateOneRequiredWithoutArchivedByNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ChatUpdateToOneWithWhereWithoutArchivedByInput, Prisma.ChatUpdateWithoutArchivedByInput>, Prisma.ChatUncheckedUpdateWithoutArchivedByInput>
 }
 
-export type ChatCreateNestedOneWithoutPinnedByInput = {
-  create?: Prisma.XOR<Prisma.ChatCreateWithoutPinnedByInput, Prisma.ChatUncheckedCreateWithoutPinnedByInput>
-  connectOrCreate?: Prisma.ChatCreateOrConnectWithoutPinnedByInput
+export type ChatCreateNestedOneWithoutPinnedChatsInput = {
+  create?: Prisma.XOR<Prisma.ChatCreateWithoutPinnedChatsInput, Prisma.ChatUncheckedCreateWithoutPinnedChatsInput>
+  connectOrCreate?: Prisma.ChatCreateOrConnectWithoutPinnedChatsInput
   connect?: Prisma.ChatWhereUniqueInput
 }
 
-export type ChatUpdateOneRequiredWithoutPinnedByNestedInput = {
-  create?: Prisma.XOR<Prisma.ChatCreateWithoutPinnedByInput, Prisma.ChatUncheckedCreateWithoutPinnedByInput>
-  connectOrCreate?: Prisma.ChatCreateOrConnectWithoutPinnedByInput
-  upsert?: Prisma.ChatUpsertWithoutPinnedByInput
+export type ChatUpdateOneRequiredWithoutPinnedChatsNestedInput = {
+  create?: Prisma.XOR<Prisma.ChatCreateWithoutPinnedChatsInput, Prisma.ChatUncheckedCreateWithoutPinnedChatsInput>
+  connectOrCreate?: Prisma.ChatCreateOrConnectWithoutPinnedChatsInput
+  upsert?: Prisma.ChatUpsertWithoutPinnedChatsInput
   connect?: Prisma.ChatWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ChatUpdateToOneWithWhereWithoutPinnedByInput, Prisma.ChatUpdateWithoutPinnedByInput>, Prisma.ChatUncheckedUpdateWithoutPinnedByInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ChatUpdateToOneWithWhereWithoutPinnedChatsInput, Prisma.ChatUpdateWithoutPinnedChatsInput>, Prisma.ChatUncheckedUpdateWithoutPinnedChatsInput>
 }
 
 export type ChatCreateNestedOneWithoutMutedByInput = {
@@ -653,10 +675,11 @@ export type ChatCreateWithoutCreatedByInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -664,7 +687,7 @@ export type ChatCreateWithoutCreatedByInput = {
   admins?: Prisma.ChatAdminCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageCreateNestedManyWithoutChatInput
 }
 
@@ -673,10 +696,11 @@ export type ChatUncheckedCreateWithoutCreatedByInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -684,7 +708,7 @@ export type ChatUncheckedCreateWithoutCreatedByInput = {
   admins?: Prisma.ChatAdminUncheckedCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatUncheckedCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatUncheckedCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutChatInput
 }
 
@@ -722,10 +746,11 @@ export type ChatScalarWhereInput = {
   name?: Prisma.StringFilter<"Chat"> | string
   description?: Prisma.StringNullableFilter<"Chat"> | string | null
   avatar?: Prisma.StringNullableFilter<"Chat"> | string | null
-  isPrivate?: Prisma.BoolFilter<"Chat"> | boolean
-  type?: Prisma.EnumEnumChatTypeFilter<"Chat"> | $Enums.EnumChatType
+  inviteLink?: Prisma.StringNullableFilter<"Chat"> | string | null
   pinnedMessageId?: Prisma.StringNullableFilter<"Chat"> | string | null
   lastMessageId?: Prisma.StringNullableFilter<"Chat"> | string | null
+  isPrivate?: Prisma.BoolFilter<"Chat"> | boolean
+  type?: Prisma.EnumEnumChatTypeFilter<"Chat"> | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFilter<"Chat"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Chat"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Chat"> | Date | string | null
@@ -737,10 +762,11 @@ export type ChatCreateWithoutMembersInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -748,7 +774,7 @@ export type ChatCreateWithoutMembersInput = {
   admins?: Prisma.ChatAdminCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageCreateNestedManyWithoutChatInput
 }
 
@@ -757,10 +783,11 @@ export type ChatUncheckedCreateWithoutMembersInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -768,7 +795,7 @@ export type ChatUncheckedCreateWithoutMembersInput = {
   admins?: Prisma.ChatAdminUncheckedCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatUncheckedCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatUncheckedCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutChatInput
 }
 
@@ -793,10 +820,11 @@ export type ChatUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -804,7 +832,7 @@ export type ChatUpdateWithoutMembersInput = {
   admins?: Prisma.ChatAdminUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUpdateManyWithoutChatNestedInput
 }
 
@@ -813,10 +841,11 @@ export type ChatUncheckedUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -824,7 +853,7 @@ export type ChatUncheckedUpdateWithoutMembersInput = {
   admins?: Prisma.ChatAdminUncheckedUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUncheckedUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUncheckedUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutChatNestedInput
 }
 
@@ -833,10 +862,11 @@ export type ChatCreateWithoutAdminsInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -844,7 +874,7 @@ export type ChatCreateWithoutAdminsInput = {
   members?: Prisma.ChatMemberCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageCreateNestedManyWithoutChatInput
 }
 
@@ -853,10 +883,11 @@ export type ChatUncheckedCreateWithoutAdminsInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -864,7 +895,7 @@ export type ChatUncheckedCreateWithoutAdminsInput = {
   members?: Prisma.ChatMemberUncheckedCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatUncheckedCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatUncheckedCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutChatInput
 }
 
@@ -889,10 +920,11 @@ export type ChatUpdateWithoutAdminsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -900,7 +932,7 @@ export type ChatUpdateWithoutAdminsInput = {
   members?: Prisma.ChatMemberUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUpdateManyWithoutChatNestedInput
 }
 
@@ -909,10 +941,11 @@ export type ChatUncheckedUpdateWithoutAdminsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -920,7 +953,7 @@ export type ChatUncheckedUpdateWithoutAdminsInput = {
   members?: Prisma.ChatMemberUncheckedUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUncheckedUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUncheckedUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutChatNestedInput
 }
 
@@ -929,10 +962,11 @@ export type ChatCreateWithoutMessagesInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -941,7 +975,7 @@ export type ChatCreateWithoutMessagesInput = {
   admins?: Prisma.ChatAdminCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
 }
 
 export type ChatUncheckedCreateWithoutMessagesInput = {
@@ -949,10 +983,11 @@ export type ChatUncheckedCreateWithoutMessagesInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -961,7 +996,7 @@ export type ChatUncheckedCreateWithoutMessagesInput = {
   admins?: Prisma.ChatAdminUncheckedCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatUncheckedCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatUncheckedCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
 }
 
 export type ChatCreateOrConnectWithoutMessagesInput = {
@@ -985,10 +1020,11 @@ export type ChatUpdateWithoutMessagesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -997,7 +1033,7 @@ export type ChatUpdateWithoutMessagesInput = {
   admins?: Prisma.ChatAdminUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
 }
 
 export type ChatUncheckedUpdateWithoutMessagesInput = {
@@ -1005,10 +1041,11 @@ export type ChatUncheckedUpdateWithoutMessagesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1017,7 +1054,7 @@ export type ChatUncheckedUpdateWithoutMessagesInput = {
   admins?: Prisma.ChatAdminUncheckedUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUncheckedUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUncheckedUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
 }
 
 export type ChatCreateWithoutArchivedByInput = {
@@ -1025,10 +1062,11 @@ export type ChatCreateWithoutArchivedByInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1036,7 +1074,7 @@ export type ChatCreateWithoutArchivedByInput = {
   members?: Prisma.ChatMemberCreateNestedManyWithoutChatInput
   admins?: Prisma.ChatAdminCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageCreateNestedManyWithoutChatInput
 }
 
@@ -1045,10 +1083,11 @@ export type ChatUncheckedCreateWithoutArchivedByInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1056,7 +1095,7 @@ export type ChatUncheckedCreateWithoutArchivedByInput = {
   members?: Prisma.ChatMemberUncheckedCreateNestedManyWithoutChatInput
   admins?: Prisma.ChatAdminUncheckedCreateNestedManyWithoutChatInput
   mutedBy?: Prisma.MutedChatUncheckedCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutChatInput
 }
 
@@ -1081,10 +1120,11 @@ export type ChatUpdateWithoutArchivedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1092,7 +1132,7 @@ export type ChatUpdateWithoutArchivedByInput = {
   members?: Prisma.ChatMemberUpdateManyWithoutChatNestedInput
   admins?: Prisma.ChatAdminUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUpdateManyWithoutChatNestedInput
 }
 
@@ -1101,10 +1141,11 @@ export type ChatUncheckedUpdateWithoutArchivedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1112,19 +1153,20 @@ export type ChatUncheckedUpdateWithoutArchivedByInput = {
   members?: Prisma.ChatMemberUncheckedUpdateManyWithoutChatNestedInput
   admins?: Prisma.ChatAdminUncheckedUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUncheckedUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutChatNestedInput
 }
 
-export type ChatCreateWithoutPinnedByInput = {
+export type ChatCreateWithoutPinnedChatsInput = {
   id?: string
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1136,15 +1178,16 @@ export type ChatCreateWithoutPinnedByInput = {
   messages?: Prisma.MessageCreateNestedManyWithoutChatInput
 }
 
-export type ChatUncheckedCreateWithoutPinnedByInput = {
+export type ChatUncheckedCreateWithoutPinnedChatsInput = {
   id?: string
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1156,31 +1199,32 @@ export type ChatUncheckedCreateWithoutPinnedByInput = {
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutChatInput
 }
 
-export type ChatCreateOrConnectWithoutPinnedByInput = {
+export type ChatCreateOrConnectWithoutPinnedChatsInput = {
   where: Prisma.ChatWhereUniqueInput
-  create: Prisma.XOR<Prisma.ChatCreateWithoutPinnedByInput, Prisma.ChatUncheckedCreateWithoutPinnedByInput>
+  create: Prisma.XOR<Prisma.ChatCreateWithoutPinnedChatsInput, Prisma.ChatUncheckedCreateWithoutPinnedChatsInput>
 }
 
-export type ChatUpsertWithoutPinnedByInput = {
-  update: Prisma.XOR<Prisma.ChatUpdateWithoutPinnedByInput, Prisma.ChatUncheckedUpdateWithoutPinnedByInput>
-  create: Prisma.XOR<Prisma.ChatCreateWithoutPinnedByInput, Prisma.ChatUncheckedCreateWithoutPinnedByInput>
+export type ChatUpsertWithoutPinnedChatsInput = {
+  update: Prisma.XOR<Prisma.ChatUpdateWithoutPinnedChatsInput, Prisma.ChatUncheckedUpdateWithoutPinnedChatsInput>
+  create: Prisma.XOR<Prisma.ChatCreateWithoutPinnedChatsInput, Prisma.ChatUncheckedCreateWithoutPinnedChatsInput>
   where?: Prisma.ChatWhereInput
 }
 
-export type ChatUpdateToOneWithWhereWithoutPinnedByInput = {
+export type ChatUpdateToOneWithWhereWithoutPinnedChatsInput = {
   where?: Prisma.ChatWhereInput
-  data: Prisma.XOR<Prisma.ChatUpdateWithoutPinnedByInput, Prisma.ChatUncheckedUpdateWithoutPinnedByInput>
+  data: Prisma.XOR<Prisma.ChatUpdateWithoutPinnedChatsInput, Prisma.ChatUncheckedUpdateWithoutPinnedChatsInput>
 }
 
-export type ChatUpdateWithoutPinnedByInput = {
+export type ChatUpdateWithoutPinnedChatsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1192,15 +1236,16 @@ export type ChatUpdateWithoutPinnedByInput = {
   messages?: Prisma.MessageUpdateManyWithoutChatNestedInput
 }
 
-export type ChatUncheckedUpdateWithoutPinnedByInput = {
+export type ChatUncheckedUpdateWithoutPinnedChatsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1217,10 +1262,11 @@ export type ChatCreateWithoutMutedByInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1228,7 +1274,7 @@ export type ChatCreateWithoutMutedByInput = {
   members?: Prisma.ChatMemberCreateNestedManyWithoutChatInput
   admins?: Prisma.ChatAdminCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageCreateNestedManyWithoutChatInput
 }
 
@@ -1237,10 +1283,11 @@ export type ChatUncheckedCreateWithoutMutedByInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1248,7 +1295,7 @@ export type ChatUncheckedCreateWithoutMutedByInput = {
   members?: Prisma.ChatMemberUncheckedCreateNestedManyWithoutChatInput
   admins?: Prisma.ChatAdminUncheckedCreateNestedManyWithoutChatInput
   archivedBy?: Prisma.ArchivedChatUncheckedCreateNestedManyWithoutChatInput
-  pinnedBy?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
+  pinnedChats?: Prisma.PinnedChatUncheckedCreateNestedManyWithoutChatInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutChatInput
 }
 
@@ -1273,10 +1320,11 @@ export type ChatUpdateWithoutMutedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1284,7 +1332,7 @@ export type ChatUpdateWithoutMutedByInput = {
   members?: Prisma.ChatMemberUpdateManyWithoutChatNestedInput
   admins?: Prisma.ChatAdminUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUpdateManyWithoutChatNestedInput
 }
 
@@ -1293,10 +1341,11 @@ export type ChatUncheckedUpdateWithoutMutedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1304,7 +1353,7 @@ export type ChatUncheckedUpdateWithoutMutedByInput = {
   members?: Prisma.ChatMemberUncheckedUpdateManyWithoutChatNestedInput
   admins?: Prisma.ChatAdminUncheckedUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUncheckedUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutChatNestedInput
 }
 
@@ -1313,10 +1362,11 @@ export type ChatCreateManyCreatedByInput = {
   name: string
   description?: string | null
   avatar?: string | null
-  isPrivate?: boolean
-  type?: $Enums.EnumChatType
+  inviteLink?: string | null
   pinnedMessageId?: string | null
   lastMessageId?: string | null
+  isPrivate?: boolean
+  type?: $Enums.EnumChatType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1327,10 +1377,11 @@ export type ChatUpdateWithoutCreatedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1338,7 +1389,7 @@ export type ChatUpdateWithoutCreatedByInput = {
   admins?: Prisma.ChatAdminUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUpdateManyWithoutChatNestedInput
 }
 
@@ -1347,10 +1398,11 @@ export type ChatUncheckedUpdateWithoutCreatedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1358,7 +1410,7 @@ export type ChatUncheckedUpdateWithoutCreatedByInput = {
   admins?: Prisma.ChatAdminUncheckedUpdateManyWithoutChatNestedInput
   archivedBy?: Prisma.ArchivedChatUncheckedUpdateManyWithoutChatNestedInput
   mutedBy?: Prisma.MutedChatUncheckedUpdateManyWithoutChatNestedInput
-  pinnedBy?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
+  pinnedChats?: Prisma.PinnedChatUncheckedUpdateManyWithoutChatNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutChatNestedInput
 }
 
@@ -1367,10 +1419,11 @@ export type ChatUncheckedUpdateManyWithoutCreatedByInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
+  inviteLink?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lastMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  type?: Prisma.EnumEnumChatTypeFieldUpdateOperationsInput | $Enums.EnumChatType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1386,7 +1439,7 @@ export type ChatCountOutputType = {
   admins: number
   archivedBy: number
   mutedBy: number
-  pinnedBy: number
+  pinnedChats: number
   messages: number
 }
 
@@ -1395,7 +1448,7 @@ export type ChatCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   admins?: boolean | ChatCountOutputTypeCountAdminsArgs
   archivedBy?: boolean | ChatCountOutputTypeCountArchivedByArgs
   mutedBy?: boolean | ChatCountOutputTypeCountMutedByArgs
-  pinnedBy?: boolean | ChatCountOutputTypeCountPinnedByArgs
+  pinnedChats?: boolean | ChatCountOutputTypeCountPinnedChatsArgs
   messages?: boolean | ChatCountOutputTypeCountMessagesArgs
 }
 
@@ -1440,7 +1493,7 @@ export type ChatCountOutputTypeCountMutedByArgs<ExtArgs extends runtime.Types.Ex
 /**
  * ChatCountOutputType without action
  */
-export type ChatCountOutputTypeCountPinnedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type ChatCountOutputTypeCountPinnedChatsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.PinnedChatWhereInput
 }
 
@@ -1457,10 +1510,11 @@ export type ChatSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   description?: boolean
   avatar?: boolean
-  isPrivate?: boolean
-  type?: boolean
+  inviteLink?: boolean
   pinnedMessageId?: boolean
   lastMessageId?: boolean
+  isPrivate?: boolean
+  type?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1470,7 +1524,7 @@ export type ChatSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   admins?: boolean | Prisma.Chat$adminsArgs<ExtArgs>
   archivedBy?: boolean | Prisma.Chat$archivedByArgs<ExtArgs>
   mutedBy?: boolean | Prisma.Chat$mutedByArgs<ExtArgs>
-  pinnedBy?: boolean | Prisma.Chat$pinnedByArgs<ExtArgs>
+  pinnedChats?: boolean | Prisma.Chat$pinnedChatsArgs<ExtArgs>
   messages?: boolean | Prisma.Chat$messagesArgs<ExtArgs>
   _count?: boolean | Prisma.ChatCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["chat"]>
@@ -1480,10 +1534,11 @@ export type ChatSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   description?: boolean
   avatar?: boolean
-  isPrivate?: boolean
-  type?: boolean
+  inviteLink?: boolean
   pinnedMessageId?: boolean
   lastMessageId?: boolean
+  isPrivate?: boolean
+  type?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1496,10 +1551,11 @@ export type ChatSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   description?: boolean
   avatar?: boolean
-  isPrivate?: boolean
-  type?: boolean
+  inviteLink?: boolean
   pinnedMessageId?: boolean
   lastMessageId?: boolean
+  isPrivate?: boolean
+  type?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1512,24 +1568,25 @@ export type ChatSelectScalar = {
   name?: boolean
   description?: boolean
   avatar?: boolean
-  isPrivate?: boolean
-  type?: boolean
+  inviteLink?: boolean
   pinnedMessageId?: boolean
   lastMessageId?: boolean
+  isPrivate?: boolean
+  type?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
   createdById?: boolean
 }
 
-export type ChatOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "avatar" | "isPrivate" | "type" | "pinnedMessageId" | "lastMessageId" | "createdAt" | "updatedAt" | "deletedAt" | "createdById", ExtArgs["result"]["chat"]>
+export type ChatOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "avatar" | "inviteLink" | "pinnedMessageId" | "lastMessageId" | "isPrivate" | "type" | "createdAt" | "updatedAt" | "deletedAt" | "createdById", ExtArgs["result"]["chat"]>
 export type ChatInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   createdBy?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   members?: boolean | Prisma.Chat$membersArgs<ExtArgs>
   admins?: boolean | Prisma.Chat$adminsArgs<ExtArgs>
   archivedBy?: boolean | Prisma.Chat$archivedByArgs<ExtArgs>
   mutedBy?: boolean | Prisma.Chat$mutedByArgs<ExtArgs>
-  pinnedBy?: boolean | Prisma.Chat$pinnedByArgs<ExtArgs>
+  pinnedChats?: boolean | Prisma.Chat$pinnedChatsArgs<ExtArgs>
   messages?: boolean | Prisma.Chat$messagesArgs<ExtArgs>
   _count?: boolean | Prisma.ChatCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1548,7 +1605,7 @@ export type $ChatPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     admins: Prisma.$ChatAdminPayload<ExtArgs>[]
     archivedBy: Prisma.$ArchivedChatPayload<ExtArgs>[]
     mutedBy: Prisma.$MutedChatPayload<ExtArgs>[]
-    pinnedBy: Prisma.$PinnedChatPayload<ExtArgs>[]
+    pinnedChats: Prisma.$PinnedChatPayload<ExtArgs>[]
     messages: Prisma.$MessagePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1556,10 +1613,11 @@ export type $ChatPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: string
     description: string | null
     avatar: string | null
-    isPrivate: boolean
-    type: $Enums.EnumChatType
+    inviteLink: string | null
     pinnedMessageId: string | null
     lastMessageId: string | null
+    isPrivate: boolean
+    type: $Enums.EnumChatType
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -1963,7 +2021,7 @@ export interface Prisma__ChatClient<T, Null = never, ExtArgs extends runtime.Typ
   admins<T extends Prisma.Chat$adminsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chat$adminsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatAdminPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   archivedBy<T extends Prisma.Chat$archivedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chat$archivedByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ArchivedChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   mutedBy<T extends Prisma.Chat$mutedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chat$mutedByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MutedChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  pinnedBy<T extends Prisma.Chat$pinnedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chat$pinnedByArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PinnedChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pinnedChats<T extends Prisma.Chat$pinnedChatsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chat$pinnedChatsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PinnedChatPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   messages<T extends Prisma.Chat$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Chat$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1998,10 +2056,11 @@ export interface ChatFieldRefs {
   readonly name: Prisma.FieldRef<"Chat", 'String'>
   readonly description: Prisma.FieldRef<"Chat", 'String'>
   readonly avatar: Prisma.FieldRef<"Chat", 'String'>
-  readonly isPrivate: Prisma.FieldRef<"Chat", 'Boolean'>
-  readonly type: Prisma.FieldRef<"Chat", 'EnumChatType'>
+  readonly inviteLink: Prisma.FieldRef<"Chat", 'String'>
   readonly pinnedMessageId: Prisma.FieldRef<"Chat", 'String'>
   readonly lastMessageId: Prisma.FieldRef<"Chat", 'String'>
+  readonly isPrivate: Prisma.FieldRef<"Chat", 'Boolean'>
+  readonly type: Prisma.FieldRef<"Chat", 'EnumChatType'>
   readonly createdAt: Prisma.FieldRef<"Chat", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Chat", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Chat", 'DateTime'>
@@ -2498,9 +2557,9 @@ export type Chat$mutedByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 }
 
 /**
- * Chat.pinnedBy
+ * Chat.pinnedChats
  */
-export type Chat$pinnedByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Chat$pinnedChatsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the PinnedChat
    */

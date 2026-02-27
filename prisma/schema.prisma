@@ -47,10 +47,11 @@ model Chat {
     name            String
     description     String?
     avatar          String?      @default("/uploads/no-chat-image.png")
-    isPrivate       Boolean      @default(false) @map("is_private")
-    type            EnumChatType @default(DIRECT)
+    inviteLink      String?      @unique @map("invite_link")
     pinnedMessageId String?      @map("pinned_message_id")
     lastMessageId   String?      @map("last_message_id")
+    isPrivate       Boolean      @default(false) @map("is_private")
+    type            EnumChatType @default(DIRECT)
     createdAt       DateTime     @default(now()) @map("created_at")
     updatedAt       DateTime     @updatedAt @map("updated_at")
     deletedAt       DateTime?    @map("deleted_at")
@@ -61,7 +62,7 @@ model Chat {
     admins      ChatAdmin[]
     archivedBy  ArchivedChat[]
     mutedBy     MutedChat[]
-    pinnedBy    PinnedChat[]
+    pinnedChats PinnedChat[]
     messages    Message[]
 
     @@index([type])
@@ -69,8 +70,9 @@ model Chat {
 }
 
 model ChatMember {
-    id       String   @id @default(cuid())
-    joinedAt DateTime @default(now()) @map("joined_at")
+    id         String    @id @default(cuid())
+    joinedAt   DateTime  @default(now()) @map("joined_at")
+    lastReadAt DateTime? @map("last_read_at")
 
     role EnumMemberRole @default(MEMBER)
 
@@ -105,6 +107,7 @@ model Message {
     replyToId       String?   @map("reply_to_id") // Сообщение, на которое отвечаем
     forwardedFromId String?   @map("forwarded_from_id") // Сообщение, которое пересылаем
     isEdited        Boolean   @default(false) @map("is_edited")
+    isSystem        Boolean   @default(false) @map("is_system")
     createdAt       DateTime  @default(now()) @map("created_at")
     updatedAt       DateTime  @updatedAt @map("updated_at")
     deletedAt       DateTime? @map("deleted_at")

@@ -1,13 +1,10 @@
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
-import { IoAdapter } from '@nestjs/platform-socket.io'
 import { RedisStore } from 'connect-redis'
-import { parse } from 'cookie'
 import * as cookieParser from 'cookie-parser'
 import * as session from 'express-session'
 import { createClient } from 'redis'
-import { ServerOptions } from 'socket.io'
 
 import { AppModule } from './app.module'
 import { SessionIoAdapter } from './libs/common/adapters'

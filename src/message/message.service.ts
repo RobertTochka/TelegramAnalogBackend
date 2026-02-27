@@ -3,9 +3,11 @@ import {
   Injectable,
   NotFoundException
 } from '@nestjs/common'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { EnumMessageStatus } from '@prisma/__generated__/enums'
 import { plainToInstance } from 'class-transformer'
 
+import { ChatService } from '@/chat/chat.service'
 import { PrismaService } from '@/prisma.service'
 
 import { CreateMessageDto, MessageFilterDto, MessageResponseDto } from './dto'
@@ -13,8 +15,9 @@ import { CreateMessageDto, MessageFilterDto, MessageResponseDto } from './dto'
 @Injectable()
 export class MessageService {
   constructor(
-    private readonly prismaService: PrismaService
-    // private readonly chatsService: ChatsService,
+    private readonly prismaService: PrismaService,
+    private readonly chatService: ChatService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   //#region gateway methods
@@ -24,12 +27,11 @@ export class MessageService {
     createMessageDto: CreateMessageDto
   ): Promise<MessageResponseDto> {
     const { chatId, content, replyToId, forwardedFromId } = createMessageDto
-    console.log('1')
 
-    // const isMember = await this.chatService.isChatMember(chatId, userId)
-    // if (!isMember) {
-    //   throw new ForbiddenException('Вы не являетесь участником этого чата')
-    // }
+    const isMember = await this.chatService.isChatMember(chatId, userId)
+    if (!isMember) {
+      throw new ForbiddenException('Вы не являетесь участником этого чата')
+    }
 
     if (replyToId) {
       const replyMessage = await this.prismaService.message.findUnique({
@@ -41,7 +43,12 @@ export class MessageService {
         )
       }
     }
-    console.log('2')
+
+    const chatMembers = await this.prismaService.chatMember.findMany({
+      where: { chatId },
+      select: { userId: true }
+    })
+    const participantIds = chatMembers.map(m => m.userId)
 
     const message = await this.prismaService.$transaction(
       async prismaService => {
@@ -65,15 +72,8 @@ export class MessageService {
             media: true
           }
         })
-        console.log('3')
 
         const newMessage = await this.connectReplyToOrForwardedFrom(mainMessage)
-
-        const chatMembers = await prismaService.chatMember.findMany({
-          where: { chatId },
-          select: { userId: true }
-        })
-        console.log('4')
 
         await prismaService.messageStatus.createMany({
           data: chatMembers.map(member => ({
@@ -85,7 +85,6 @@ export class MessageService {
                 : EnumMessageStatus.SENT
           }))
         })
-        console.log('5')
 
         await prismaService.chat.update({
           where: { id: chatId },
@@ -96,7 +95,17 @@ export class MessageService {
       }
     )
 
-    return this.mapToResponseDto(message)
+    const messageDto = this.mapToResponseDto(message)
+
+    // Эмитим событие о новом сообщении
+    this.eventEmitter.emit('message.created', {
+      message: messageDto,
+      chatId,
+      participantIds,
+      senderId: userId
+    })
+
+    return messageDto
   }
 
   async findOne(
@@ -131,13 +140,10 @@ export class MessageService {
 
     const message = await this.connectReplyToOrForwardedFrom(mainMessage)
 
-    // const isMember = await this.chatService.isChatMember(
-    //   message.chatId,
-    //   userId
-    // )
-    // if (!isMember) {
-    //   throw new ForbiddenException('У вас нет доступа к этому сообщению')
-    // }
+    const isMember = await this.chatService.isChatMember(message.chatId, userId)
+    if (!isMember) {
+      throw new ForbiddenException('У вас нет доступа к этому сообщению')
+    }
 
     return this.mapToResponseDto(message)
   }
@@ -285,10 +291,10 @@ export class MessageService {
     messages: MessageResponseDto[]
     total: number
   }> {
-    // const isMember = await this.chatService.isChatMember(chatId, userId)
-    // if (!isMember) {
-    //   throw new ForbiddenException('Вы не являетесь участником этого чата')
-    // }
+    const isMember = await this.chatService.isChatMember(chatId, userId)
+    if (!isMember) {
+      throw new ForbiddenException('Вы не являетесь участником этого чата')
+    }
 
     const { page = 1, limit = 50, fromDate, search } = filter
     const skip = (page - 1) * limit

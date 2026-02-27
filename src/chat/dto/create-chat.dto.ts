@@ -1,4 +1,5 @@
 import { EnumChatType } from '@prisma/__generated__/enums'
+import { Type } from 'class-transformer'
 import {
   ArrayMinSize,
   IsArray,
@@ -8,7 +9,8 @@ import {
   IsString,
   MaxLength,
   MinLength,
-  ValidateIf
+  ValidateIf,
+  ValidateNested
 } from 'class-validator'
 
 export class CreateChatDto {
@@ -31,7 +33,6 @@ export class CreateChatDto {
   type: EnumChatType
 
   @IsArray()
-  @IsString()
   @ArrayMinSize(1, { message: 'Чат должен содержать хотя бы одного участника' })
   participantIds: string[]
 

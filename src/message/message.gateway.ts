@@ -1,3 +1,4 @@
+import { OnEvent } from '@nestjs/event-emitter'
 import {
   ConnectedSocket,
   MessageBody,
@@ -11,6 +12,7 @@ import {
 import { EnumMessageStatus } from '@prisma/__generated__/enums'
 import { Server, Socket } from 'socket.io'
 
+import { ChatService } from '@/chat/chat.service'
 import { PrismaService } from '@/prisma.service'
 
 import { CreateMessageDto } from './dto'
@@ -50,8 +52,8 @@ export class MessageGateway
 
   constructor(
     private readonly messageService: MessageService,
-    private readonly prismaService: PrismaService
-    // private readonly chatService: ChatService
+    private readonly prismaService: PrismaService,
+    private readonly chatService: ChatService
   ) {}
 
   async handleConnection(client: AuthenticatedSocket) {
@@ -192,10 +194,10 @@ export class MessageGateway
       const userId = client.data.userId
       const { chatId, isTyping } = payload
 
-      // const isMember = await this.chatService.isChatMember(chatId, user.id)
-      // if (!isMember) {
-      //   throw new WsException('Вы не являетесь участником этого чата')
-      // }
+      const isMember = await this.chatService.isChatMember(chatId, userId)
+      if (!isMember) {
+        throw new WsException('Вы не являетесь участником этого чата')
+      }
 
       client.to(`chat:${chatId}`).emit('typing', {
         chatId,
@@ -291,5 +293,47 @@ export class MessageGateway
     } catch (error) {
       throw new WsException(error.message)
     }
+  }
+
+  /**
+   * Отправка уведомления конкретному пользователю
+   */
+  private notifyUser(userId: string, event: string, data: any) {
+    const sockets = this.userSockets.get(userId)
+    if (sockets) {
+      sockets.forEach(socketId => {
+        this.server.to(socketId).emit(event, data)
+      })
+    }
+  }
+
+  /**
+   * Отправка уведомления нескольким пользователям
+   */
+  private notifyUsers(userIds: string[], event: string, data: any) {
+    userIds.forEach(userId => {
+      this.notifyUser(userId, event, data)
+    })
+  }
+
+  /**
+   * Событие: новое сообщение
+   */
+  @OnEvent('message.created')
+  handleNewMessage(payload: {
+    message: any
+    chatId: string
+    participantIds: string[]
+    senderId: string
+  }) {
+    const { message, chatId, participantIds, senderId } = payload
+
+    const notifyUserIds = participantIds.filter(id => id !== senderId)
+
+    this.notifyUsers(notifyUserIds, 'message:new', {
+      chatId,
+      message,
+      senderId
+    })
   }
 }
