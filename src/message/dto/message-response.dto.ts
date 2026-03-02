@@ -12,10 +12,13 @@ export class MessageResponseDto {
 
   @Expose()
   @Type(() => SenderDto)
-  sender: SenderDto
+  sender?: SenderDto
 
   @Expose()
   content?: string
+
+  @Expose()
+  isSystem: boolean
 
   @Expose()
   @Type(() => MessageResponseDto)

@@ -17,7 +17,6 @@ model User {
     lastName          String?            @map("last_name")
     description       String?
     avatar            String?            @default("/uploads/no-user-image.png")
-    isPhoneVerified   Boolean            @default(false) @map("is_phone_verified")
     isPasswordEnabled Boolean            @default(false) @map("is_password_enabled")
     status            EnumUserStatus     @default(OFFLINE)
     role              EnumUserRole       @default(USER)
@@ -85,7 +84,11 @@ model Chat {
     pinnedChats PinnedChat[]
     messages    Message[]
 
+    @@index([deletedAt])
+    @@index([updatedAt])
+    @@index([createdAt])
     @@index([type])
+    @@index([isPrivate])
     @@map("chats")
 }
 

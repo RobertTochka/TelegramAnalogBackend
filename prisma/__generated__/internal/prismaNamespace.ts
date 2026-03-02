@@ -1352,7 +1352,6 @@ export const UserScalarFieldEnum = {
   lastName: 'lastName',
   description: 'description',
   avatar: 'avatar',
-  isPhoneVerified: 'isPhoneVerified',
   isPasswordEnabled: 'isPasswordEnabled',
   status: 'status',
   role: 'role',

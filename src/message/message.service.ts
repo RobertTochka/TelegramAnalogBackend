@@ -303,6 +303,7 @@ export class MessageService {
       .findMany({
         where: {
           chatId,
+          isSystem: false,
           deletedAt: null,
           ...(fromDate && { createdAt: new Date(fromDate) }),
           ...(search && {

@@ -17,20 +17,20 @@ import { RegisterDto } from './dto/register.dto'
 export class AuthController {
   public constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
   @HttpCode(HttpStatus.OK)
+  @Post('register')
   public async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto)
   }
 
-  @Post('login')
   @HttpCode(HttpStatus.OK)
+  @Post('login')
   public async login(@Req() req: Request, @Body() dto: LoginDto) {
     return this.authService.login(req, dto)
   }
 
-  @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @Post('logout')
   public async logout(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response

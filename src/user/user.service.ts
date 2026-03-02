@@ -13,6 +13,7 @@ import {
   ChangePasswordDto,
   CreateUserDto,
   FriendRequestsResponseDto,
+  GetFriendsResponseDto,
   SearchUsersDto,
   UpdateUserDto
 } from './dto'
@@ -73,6 +74,46 @@ export class UserService {
     const user = await this.prismaService.user.findUnique({
       where: {
         id
+      },
+      include: {
+        // Друзья, где пользователь является инициатором
+        friendships: {
+          where: {
+            status: 'ACCEPTED'
+          },
+          include: {
+            friend: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+                status: true,
+                lastSeen: true
+              }
+            }
+          }
+        },
+        // Друзья, где пользователь является получателем
+        friendOf: {
+          where: {
+            status: 'ACCEPTED'
+          },
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+                status: true,
+                lastSeen: true
+              }
+            }
+          }
+        }
       }
     })
 
@@ -81,7 +122,101 @@ export class UserService {
         'Пользователь не найден. Пожалуйста, проверьте введенные данные.'
       )
 
-    return user
+    const friends = [
+      ...user.friendships.map(f => f.friend),
+      ...user.friendOf.map(f => f.user)
+    ]
+
+    const uniqueFriends = Array.from(
+      new Map(friends.map(friend => [friend.id, friend])).values()
+    )
+
+    return {
+      ...user,
+      friends: uniqueFriends,
+      friendships: undefined,
+      friendOf: undefined
+    }
+  }
+
+  public async findProfileById(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id
+      },
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        description: true,
+        avatar: true,
+        status: true,
+        lastSeen: true,
+        friendships: {
+          where: {
+            status: 'ACCEPTED'
+          },
+          select: {
+            friend: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+                status: true,
+                lastSeen: true
+              }
+            }
+          }
+        },
+        friendOf: {
+          where: {
+            status: 'ACCEPTED'
+          },
+          select: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+                status: true,
+                lastSeen: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!user)
+      throw new NotFoundException(
+        'Пользователь не найден. Пожалуйста, проверьте введенные данные.'
+      )
+
+    const friends = [
+      ...user.friendships.map(f => f.friend),
+      ...user.friendOf.map(f => f.user)
+    ]
+
+    const uniqueFriends = Array.from(
+      new Map(friends.map(friend => [friend.id, friend])).values()
+    )
+
+    return {
+      id: user.id,
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      description: user.description,
+      avatar: user.avatar,
+      status: user.status,
+      lastSeen: user.lastSeen,
+      friends: uniqueFriends
+    }
   }
 
   public async findByEmail(email: string) {
@@ -196,7 +331,7 @@ export class UserService {
       throw new ConflictException('Пользователь уже в друзьях')
     }
 
-    const friendship = await this.prismaService.friendship.create({
+    await this.prismaService.friendship.create({
       data: {
         userId,
         friendId,
@@ -213,13 +348,11 @@ export class UserService {
         }
       }
     })
-
-    return friendship
   }
 
   // Принять запрос в друзья
   async acceptFriendRequest(userId: string, friendId: string) {
-    return this.prismaService.friendship.update({
+    await this.prismaService.friendship.update({
       where: {
         userId_friendId: {
           userId: friendId, // Тот, кто отправил запрос
@@ -233,7 +366,7 @@ export class UserService {
   }
 
   // Получить список друзей пользователя
-  async getFriends(userId: string) {
+  async getFriends(userId: string): Promise<GetFriendsResponseDto> {
     const friendships = await this.prismaService.friendship.findMany({
       where: {
         OR: [
@@ -245,8 +378,10 @@ export class UserService {
         user: {
           select: {
             id: true,
+            username: true,
             firstName: true,
             lastName: true,
+            description: true,
             avatar: true,
             status: true,
             lastSeen: true
@@ -258,6 +393,7 @@ export class UserService {
             username: true,
             firstName: true,
             lastName: true,
+            description: true,
             avatar: true,
             status: true,
             lastSeen: true
@@ -266,51 +402,12 @@ export class UserService {
       }
     })
 
-    return friendships.map(f => (f.userId === userId ? f.friend : f.user))
-  }
+    const friends = friendships.map(f =>
+      f.userId === userId ? f.friend : f.user
+    )
+    const friendRequests = await this.getFriendRequests(userId)
 
-  // Получить все запросы в друзья
-  async getFriendRequests(userId: string) {
-    const incomingRequests = await this.prismaService.friendship.findMany({
-      where: {
-        friendId: userId,
-        status: EnumFriendshipStatus.PENDING
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true
-          }
-        }
-      }
-    })
-
-    const outgoingRequests = await this.prismaService.friendship.findMany({
-      where: {
-        userId,
-        status: EnumFriendshipStatus.PENDING
-      },
-      include: {
-        friend: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true
-          }
-        }
-      }
-    })
-
-    const requests: FriendRequestsResponseDto = {
-      incomingRequests,
-      outgoingRequests
-    }
-
-    return requests
+    return { friends, friendRequests }
   }
 
   // Удалить из друзей / отклонить запрос
@@ -333,5 +430,64 @@ export class UserService {
         id: friendship.id
       }
     })
+  }
+
+  //#region private methods
+
+  // Получить все запросы в друзья
+  private async getFriendRequests(
+    userId: string
+  ): Promise<FriendRequestsResponseDto> {
+    const incomingFriendships = await this.prismaService.friendship.findMany({
+      where: {
+        friendId: userId,
+        status: EnumFriendshipStatus.PENDING
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            description: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            status: true,
+            lastSeen: true
+          }
+        }
+      }
+    })
+
+    const outgoingFriendships = await this.prismaService.friendship.findMany({
+      where: {
+        userId,
+        status: EnumFriendshipStatus.PENDING
+      },
+      include: {
+        friend: {
+          select: {
+            id: true,
+            username: true,
+            description: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            status: true,
+            lastSeen: true
+          }
+        }
+      }
+    })
+
+    const incomingRequests = incomingFriendships.map(f => f.user)
+    const outgoingRequests = outgoingFriendships.map(f => f.friend)
+
+    const requests: FriendRequestsResponseDto = {
+      incomingRequests,
+      outgoingRequests
+    }
+
+    return requests
   }
 }

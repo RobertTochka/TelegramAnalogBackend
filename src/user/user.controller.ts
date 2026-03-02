@@ -30,7 +30,7 @@ export class UserController {
   @Authorization()
   @HttpCode(HttpStatus.OK)
   @Get('profile')
-  public async findProfile(@Authorized('id') userId: string) {
+  public async getProfile(@Authorized('id') userId: string) {
     return this.userService.findById(userId)
   }
 
@@ -42,6 +42,13 @@ export class UserController {
     @Body() dto: UpdateUserDto
   ) {
     return this.userService.update(userId, dto)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Get('profile/:userId')
+  public async findProfile(@Param() userId: string) {
+    return this.userService.findProfileById(userId)
   }
 
   @Authorization()
@@ -58,35 +65,28 @@ export class UserController {
 
   @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Post('friends/add/:friendId')
+  @Post('friends')
   public async sendFriendRequest(
     @Authorized('id') userId: string,
-    @Param('friendId') friendId: string
+    @Body() dto: { friendId: string }
   ) {
-    return this.userService.sendFriendRequest(userId, friendId)
+    return this.userService.sendFriendRequest(userId, dto.friendId)
   }
 
   @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Post('friends/accept/:friendId')
+  @Patch('friends')
   public async acceptFriendRequest(
     @Authorized('id') userId: string,
-    @Param('friendId') friendId: string
+    @Body() dto: { friendId: string }
   ) {
-    return this.userService.acceptFriendRequest(userId, friendId)
+    return this.userService.acceptFriendRequest(userId, dto.friendId)
   }
 
   @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Get('friends/list')
+  @Get('friends')
   public async getFriends(@Authorized('id') userId: string) {
     return this.userService.getFriends(userId)
-  }
-
-  @Authorization()
-  @HttpCode(HttpStatus.OK)
-  @Get('friends/requests')
-  public async getFriendRequests(@Authorized('id') userId: string) {
-    return this.userService.getFriendRequests(userId)
   }
 }

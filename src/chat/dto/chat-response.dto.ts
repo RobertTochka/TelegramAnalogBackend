@@ -1,7 +1,7 @@
 import { EnumChatType } from '@prisma/__generated__/enums'
 import { Expose, Type } from 'class-transformer'
 
-import { LastMessageDto } from './last-message.dto'
+import { MessageDto } from './message.dto'
 import { ParticipantDto } from './participant.dto'
 
 export class ChatResponseDto {
@@ -35,11 +35,15 @@ export class ChatResponseDto {
 
   @Expose()
   @Type(() => ParticipantDto)
-  participants?: ParticipantDto[]
+  participants: ParticipantDto[]
 
   @Expose()
-  @Type(() => LastMessageDto)
-  lastMessage?: LastMessageDto
+  @Type(() => MessageDto)
+  lastMessage?: MessageDto
+
+  @Expose()
+  @Type(() => MessageDto)
+  pinnedMessage?: MessageDto
 
   @Expose()
   unreadCount?: number
@@ -51,14 +55,14 @@ export class ChatResponseDto {
   updatedAt: Date
 
   @Expose()
-  participantCount?: number
+  participantCount: number
 
   @Expose()
-  isArchived?: boolean
+  isArchived: boolean
 
   @Expose()
-  isMuted?: boolean
+  isMuted: boolean
 
   @Expose()
-  isPinned?: boolean
+  isPinned: boolean
 }

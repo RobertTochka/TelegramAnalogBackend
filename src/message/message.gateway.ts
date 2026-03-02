@@ -114,7 +114,6 @@ export class MessageGateway
     @MessageBody() payload: CreateMessageDto & { tempId: string }
   ) {
     try {
-      console.log('asdasd')
       const userId = client.data.userId
 
       const message = await this.messageService.create(userId, payload)

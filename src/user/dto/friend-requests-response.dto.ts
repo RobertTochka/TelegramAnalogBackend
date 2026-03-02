@@ -1,21 +1,6 @@
-import { Friendship } from '@prisma/__generated__/client'
+import { UserDto } from './user.dto'
 
 export class FriendRequestsResponseDto {
-  incomingRequests: ({
-    user: {
-      id: string
-      firstName: string
-      lastName: string
-      avatar: string
-    }
-  } & Friendship)[]
-
-  outgoingRequests: ({
-    friend: {
-      id: string
-      firstName: string
-      lastName: string
-      avatar: string
-    }
-  } & Friendship)[]
+  incomingRequests: UserDto[]
+  outgoingRequests: UserDto[]
 }

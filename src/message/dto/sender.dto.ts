@@ -5,11 +5,11 @@ export class SenderDto {
   id: string
 
   @Expose()
-  firstName?: string
+  firstName: string
 
   @Expose()
-  lastName?: string
+  lastName: string
 
   @Expose()
-  avatar?: string
+  avatar: string
 }

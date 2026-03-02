@@ -34,7 +34,6 @@ export type UserMinAggregateOutputType = {
   lastName: string | null
   description: string | null
   avatar: string | null
-  isPhoneVerified: boolean | null
   isPasswordEnabled: boolean | null
   status: $Enums.EnumUserStatus | null
   role: $Enums.EnumUserRole | null
@@ -55,7 +54,6 @@ export type UserMaxAggregateOutputType = {
   lastName: string | null
   description: string | null
   avatar: string | null
-  isPhoneVerified: boolean | null
   isPasswordEnabled: boolean | null
   status: $Enums.EnumUserStatus | null
   role: $Enums.EnumUserRole | null
@@ -76,7 +74,6 @@ export type UserCountAggregateOutputType = {
   lastName: number
   description: number
   avatar: number
-  isPhoneVerified: number
   isPasswordEnabled: number
   status: number
   role: number
@@ -99,7 +96,6 @@ export type UserMinAggregateInputType = {
   lastName?: true
   description?: true
   avatar?: true
-  isPhoneVerified?: true
   isPasswordEnabled?: true
   status?: true
   role?: true
@@ -120,7 +116,6 @@ export type UserMaxAggregateInputType = {
   lastName?: true
   description?: true
   avatar?: true
-  isPhoneVerified?: true
   isPasswordEnabled?: true
   status?: true
   role?: true
@@ -141,7 +136,6 @@ export type UserCountAggregateInputType = {
   lastName?: true
   description?: true
   avatar?: true
-  isPhoneVerified?: true
   isPasswordEnabled?: true
   status?: true
   role?: true
@@ -235,7 +229,6 @@ export type UserGroupByOutputType = {
   lastName: string | null
   description: string | null
   avatar: string | null
-  isPhoneVerified: boolean
   isPasswordEnabled: boolean
   status: $Enums.EnumUserStatus
   role: $Enums.EnumUserRole
@@ -277,7 +270,6 @@ export type UserWhereInput = {
   lastName?: Prisma.StringNullableFilter<"User"> | string | null
   description?: Prisma.StringNullableFilter<"User"> | string | null
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
-  isPhoneVerified?: Prisma.BoolFilter<"User"> | boolean
   isPasswordEnabled?: Prisma.BoolFilter<"User"> | boolean
   status?: Prisma.EnumEnumUserStatusFilter<"User"> | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFilter<"User"> | $Enums.EnumUserRole
@@ -308,7 +300,6 @@ export type UserOrderByWithRelationInput = {
   lastName?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
-  isPhoneVerified?: Prisma.SortOrder
   isPasswordEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -342,7 +333,6 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   lastName?: Prisma.StringNullableFilter<"User"> | string | null
   description?: Prisma.StringNullableFilter<"User"> | string | null
   avatar?: Prisma.StringNullableFilter<"User"> | string | null
-  isPhoneVerified?: Prisma.BoolFilter<"User"> | boolean
   isPasswordEnabled?: Prisma.BoolFilter<"User"> | boolean
   status?: Prisma.EnumEnumUserStatusFilter<"User"> | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFilter<"User"> | $Enums.EnumUserRole
@@ -373,7 +363,6 @@ export type UserOrderByWithAggregationInput = {
   lastName?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
-  isPhoneVerified?: Prisma.SortOrder
   isPasswordEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -400,7 +389,6 @@ export type UserScalarWhereWithAggregatesInput = {
   lastName?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   avatar?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
-  isPhoneVerified?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   isPasswordEnabled?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   status?: Prisma.EnumEnumUserStatusWithAggregatesFilter<"User"> | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleWithAggregatesFilter<"User"> | $Enums.EnumUserRole
@@ -421,7 +409,6 @@ export type UserCreateInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -452,7 +439,6 @@ export type UserUncheckedCreateInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -483,7 +469,6 @@ export type UserUpdateInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -514,7 +499,6 @@ export type UserUncheckedUpdateInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -545,7 +529,6 @@ export type UserCreateManyInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -566,7 +549,6 @@ export type UserUpdateManyMutationInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -587,7 +569,6 @@ export type UserUncheckedUpdateManyInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -608,7 +589,6 @@ export type UserCountOrderByAggregateInput = {
   lastName?: Prisma.SortOrder
   description?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
-  isPhoneVerified?: Prisma.SortOrder
   isPasswordEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -629,7 +609,6 @@ export type UserMaxOrderByAggregateInput = {
   lastName?: Prisma.SortOrder
   description?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
-  isPhoneVerified?: Prisma.SortOrder
   isPasswordEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -650,7 +629,6 @@ export type UserMinOrderByAggregateInput = {
   lastName?: Prisma.SortOrder
   description?: Prisma.SortOrder
   avatar?: Prisma.SortOrder
-  isPhoneVerified?: Prisma.SortOrder
   isPasswordEnabled?: Prisma.SortOrder
   status?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -848,7 +826,6 @@ export type UserCreateWithoutFriendshipsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -878,7 +855,6 @@ export type UserUncheckedCreateWithoutFriendshipsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -913,7 +889,6 @@ export type UserCreateWithoutFriendOfInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -943,7 +918,6 @@ export type UserUncheckedCreateWithoutFriendOfInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -989,7 +963,6 @@ export type UserUpdateWithoutFriendshipsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1019,7 +992,6 @@ export type UserUncheckedUpdateWithoutFriendshipsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1060,7 +1032,6 @@ export type UserUpdateWithoutFriendOfInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1090,7 +1061,6 @@ export type UserUncheckedUpdateWithoutFriendOfInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1120,7 +1090,6 @@ export type UserCreateWithoutCreatedChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1150,7 +1119,6 @@ export type UserUncheckedCreateWithoutCreatedChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1196,7 +1164,6 @@ export type UserUpdateWithoutCreatedChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1226,7 +1193,6 @@ export type UserUncheckedUpdateWithoutCreatedChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1256,7 +1222,6 @@ export type UserCreateWithoutChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1286,7 +1251,6 @@ export type UserUncheckedCreateWithoutChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1332,7 +1296,6 @@ export type UserUpdateWithoutChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1362,7 +1325,6 @@ export type UserUncheckedUpdateWithoutChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1392,7 +1354,6 @@ export type UserCreateWithoutChatAdminsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1422,7 +1383,6 @@ export type UserUncheckedCreateWithoutChatAdminsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1468,7 +1428,6 @@ export type UserUpdateWithoutChatAdminsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1498,7 +1457,6 @@ export type UserUncheckedUpdateWithoutChatAdminsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1528,7 +1486,6 @@ export type UserCreateWithoutMessagesInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1558,7 +1515,6 @@ export type UserUncheckedCreateWithoutMessagesInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1604,7 +1560,6 @@ export type UserUpdateWithoutMessagesInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1634,7 +1589,6 @@ export type UserUncheckedUpdateWithoutMessagesInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1664,7 +1618,6 @@ export type UserCreateWithoutMessageStatusInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1694,7 +1647,6 @@ export type UserUncheckedCreateWithoutMessageStatusInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1740,7 +1692,6 @@ export type UserUpdateWithoutMessageStatusInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1770,7 +1721,6 @@ export type UserUncheckedUpdateWithoutMessageStatusInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1800,7 +1750,6 @@ export type UserCreateWithoutArchivedChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1830,7 +1779,6 @@ export type UserUncheckedCreateWithoutArchivedChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1876,7 +1824,6 @@ export type UserUpdateWithoutArchivedChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1906,7 +1853,6 @@ export type UserUncheckedUpdateWithoutArchivedChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -1936,7 +1882,6 @@ export type UserCreateWithoutPinnedChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -1966,7 +1911,6 @@ export type UserUncheckedCreateWithoutPinnedChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -2012,7 +1956,6 @@ export type UserUpdateWithoutPinnedChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -2042,7 +1985,6 @@ export type UserUncheckedUpdateWithoutPinnedChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -2072,7 +2014,6 @@ export type UserCreateWithoutMutedChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -2102,7 +2043,6 @@ export type UserUncheckedCreateWithoutMutedChatsInput = {
   lastName?: string | null
   description?: string | null
   avatar?: string | null
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: $Enums.EnumUserStatus
   role?: $Enums.EnumUserRole
@@ -2148,7 +2088,6 @@ export type UserUpdateWithoutMutedChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -2178,7 +2117,6 @@ export type UserUncheckedUpdateWithoutMutedChatsInput = {
   lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  isPhoneVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPasswordEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.EnumEnumUserStatusFieldUpdateOperationsInput | $Enums.EnumUserStatus
   role?: Prisma.EnumEnumUserRoleFieldUpdateOperationsInput | $Enums.EnumUserRole
@@ -2320,7 +2258,6 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   lastName?: boolean
   description?: boolean
   avatar?: boolean
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: boolean
   role?: boolean
@@ -2352,7 +2289,6 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   lastName?: boolean
   description?: boolean
   avatar?: boolean
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: boolean
   role?: boolean
@@ -2373,7 +2309,6 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   lastName?: boolean
   description?: boolean
   avatar?: boolean
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: boolean
   role?: boolean
@@ -2394,7 +2329,6 @@ export type UserSelectScalar = {
   lastName?: boolean
   description?: boolean
   avatar?: boolean
-  isPhoneVerified?: boolean
   isPasswordEnabled?: boolean
   status?: boolean
   role?: boolean
@@ -2405,7 +2339,7 @@ export type UserSelectScalar = {
   deletedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "password" | "username" | "firstName" | "lastName" | "description" | "avatar" | "isPhoneVerified" | "isPasswordEnabled" | "status" | "role" | "visibility" | "lastSeen" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "password" | "username" | "firstName" | "lastName" | "description" | "avatar" | "isPasswordEnabled" | "status" | "role" | "visibility" | "lastSeen" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
   createdChats?: boolean | Prisma.User$createdChatsArgs<ExtArgs>
@@ -2446,7 +2380,6 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     lastName: string | null
     description: string | null
     avatar: string | null
-    isPhoneVerified: boolean
     isPasswordEnabled: boolean
     status: $Enums.EnumUserStatus
     role: $Enums.EnumUserRole
@@ -2897,7 +2830,6 @@ export interface UserFieldRefs {
   readonly lastName: Prisma.FieldRef<"User", 'String'>
   readonly description: Prisma.FieldRef<"User", 'String'>
   readonly avatar: Prisma.FieldRef<"User", 'String'>
-  readonly isPhoneVerified: Prisma.FieldRef<"User", 'Boolean'>
   readonly isPasswordEnabled: Prisma.FieldRef<"User", 'Boolean'>
   readonly status: Prisma.FieldRef<"User", 'EnumUserStatus'>
   readonly role: Prisma.FieldRef<"User", 'EnumUserRole'>

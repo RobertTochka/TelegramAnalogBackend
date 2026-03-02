@@ -18,6 +18,7 @@ import {
   ChatFilterDto,
   ChatResponseDto,
   CreateChatDto,
+  PaginatedResponse,
   UpdateChatDto
 } from './dto'
 
@@ -118,7 +119,7 @@ export class ChatService {
   async findAll(
     userId: string,
     filter: ChatFilterDto
-  ): Promise<{ chats: ChatResponseDto[]; total: number }> {
+  ): Promise<PaginatedResponse<ChatResponseDto[]>> {
     const {
       type,
       isPrivate,
@@ -157,74 +158,115 @@ export class ChatService {
       })
     }
 
-    const chats = await this.prismaService.chat
-      .findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
-        include: {
-          members: {
-            include: {
-              user: {
-                select: {
-                  id: true,
-                  username: true,
-                  firstName: true,
-                  lastName: true,
-                  avatar: true,
-                  status: true
-                }
+    if (isArchived !== undefined) {
+      where.archivedBy = isArchived
+        ? { some: { userId } }
+        : { none: { userId } }
+    }
+
+    if (isMuted !== undefined) {
+      where.mutedBy = isMuted ? { some: { userId } } : { none: { userId } }
+    }
+
+    const total = await this.prismaService.chat.count({ where })
+
+    if (total === 0) {
+      return {
+        data: [],
+        meta: {
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false
+        }
+      }
+    }
+
+    let chats = await this.prismaService.chat.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: [
+        { pinnedChats: { _count: 'desc' } }, // Сначала закрепленные
+        { updatedAt: 'desc' },
+        { createdAt: 'desc' }
+      ],
+      include: {
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                firstName: true,
+                lastName: true,
+                avatar: true,
+                status: true
               }
             }
-          },
-          archivedBy: {
-            where: { userId },
-            take: 1
-          },
-          mutedBy: {
-            where: { userId },
-            take: 1
-          },
-          pinnedChats: {
-            where: { userId },
-            take: 1
-          },
-          _count: {
-            select: {
-              members: true,
-              messages: true
+          }
+        },
+        archivedBy: {
+          where: { userId },
+          select: { archivedAt: true }
+        },
+        mutedBy: {
+          where: { userId },
+          select: { mutedUntil: true, mutedAt: true }
+        },
+        pinnedChats: {
+          where: { userId },
+          select: { pinnedAt: true }
+        },
+        _count: {
+          select: {
+            members: true,
+            messages: {
+              where: { deletedAt: null }
             }
           }
         }
-      })
-      .then(chats =>
-        Promise.all(
-          chats.map(chat => {
-            if (chat.lastMessageId) return this.connectLastMessageToChat(chat)
-          })
-        )
-      )
+      }
+    })
 
-    let filteredChats = chats
-    if (isArchived !== undefined) {
-      filteredChats = filteredChats.filter(chat =>
-        isArchived ? chat.archivedBy.length > 0 : chat.archivedBy.length === 0
-      )
-    }
-    if (isMuted !== undefined) {
-      filteredChats = filteredChats.filter(chat =>
-        isMuted ? chat.mutedBy.length > 0 : chat.mutedBy.length === 0
-      )
-    }
+    chats = await Promise.all(
+      chats.map(async chat => {
+        let enhancedChat = { ...chat }
+
+        if (chat.lastMessageId) {
+          enhancedChat = await this.connectLastMessageToChat(enhancedChat)
+        }
+
+        if (chat.pinnedMessageId) {
+          enhancedChat = await this.connectPinnedMessageToChat(enhancedChat)
+        }
+
+        return enhancedChat
+      })
+    )
 
     const unreadCounts = await this.getUnreadCounts(userId)
 
+    const totalPages = Math.ceil(total / limit)
+    const hasNextPage = page < totalPages
+    const hasPreviousPage = page > 1
+
+    const data = chats.map(chat =>
+      this.mapToResponseDto(chat, unreadCounts[chat.id] || 0)
+    )
+
     return {
-      chats: filteredChats.map(chat =>
-        this.mapToResponseDto(chat, unreadCounts[chat.id])
-      ),
-      total: filteredChats.length
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage
+      }
     }
   }
 
@@ -283,6 +325,9 @@ export class ChatService {
 
     if (chat.lastMessageId)
       newChat = (await this.connectLastMessageToChat(chat)) as typeof chat
+
+    if (chat.pinnedMessageId)
+      newChat = (await this.connectPinnedMessageToChat(chat)) as typeof chat
 
     if (!newChat) {
       throw new NotFoundException('Чат не найден')
@@ -1011,6 +1056,29 @@ export class ChatService {
 
   //#region private methods
 
+  private async connectPinnedMessageToChat(chat) {
+    const pinnedMessage = await this.prismaService.message.findUnique({
+      where: {
+        id: chat.pinnedMessageId,
+        chatId: chat.id
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            firstName: true,
+            lastName: true
+          }
+        }
+      }
+    })
+
+    const newChat = { ...chat, pinnedMessage }
+
+    return newChat
+  }
+
   private async connectLastMessageToChat(chat) {
     const lastMessage = await this.prismaService.message.findUnique({
       where: {
@@ -1129,10 +1197,14 @@ export class ChatService {
 
     if (!mainChat) return null
 
-    if (mainChat.lastMessageId)
-      return this.mapToResponseDto(this.connectLastMessageToChat(mainChat))
+    let newChat = mainChat
 
-    return this.mapToResponseDto(mainChat)
+    if (mainChat.lastMessageId)
+      newChat = await this.connectLastMessageToChat(mainChat)
+    if (mainChat.pinnedMessageId)
+      newChat = await this.connectPinnedMessageToChat(mainChat)
+
+    return this.mapToResponseDto(newChat)
   }
 
   /**
