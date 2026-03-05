@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException
 } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
@@ -24,6 +25,8 @@ import {
 
 @Injectable()
 export class ChatService {
+  private readonly logger = new Logger(ChatService.name)
+
   constructor(
     private prismaService: PrismaService,
     private eventEmitter: EventEmitter2
@@ -203,7 +206,8 @@ export class ChatService {
                 firstName: true,
                 lastName: true,
                 avatar: true,
-                status: true
+                status: true,
+                lastSeen: true
               }
             }
           }
@@ -286,7 +290,8 @@ export class ChatService {
                 firstName: true,
                 lastName: true,
                 avatar: true,
-                status: true
+                status: true,
+                lastSeen: true
               }
             }
           }
@@ -1187,7 +1192,8 @@ export class ChatService {
                 firstName: true,
                 lastName: true,
                 avatar: true,
-                status: true
+                status: true,
+                lastSeen: true
               }
             }
           }
@@ -1232,6 +1238,8 @@ export class ChatService {
       lastName: member.user.lastName,
       avatar: member.user.avatar,
       role: member.role,
+      status: member.user.status,
+      lastSeen: member.user.lastSeen,
       joinedAt: member.joinedAt,
       lastReadAt: member.lastReadAt
     }))

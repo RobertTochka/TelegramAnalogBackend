@@ -42,9 +42,7 @@ export class AuthService {
       newUser.email
     )
 
-    return {
-      message: `Пожалуйста, введите код из вашего email. Сообщение было отправлено на ваш почтовый адрес. ${code}`
-    }
+    return `Пожалуйста, введите код из вашего email. Сообщение было отправлено на ваш почтовый адрес. ${code}`
 
     // await this.emailConfirmationService.sendVerificationToken(newUser)
 
@@ -75,9 +73,7 @@ export class AuthService {
       user.email
     )
 
-    return {
-      message: `Пожалуйста, введите код из вашего email. Сообщение было отправлено на ваш почтовый адрес. ${code}`
-    }
+    return `Пожалуйста, введите код из вашего email. Сообщение было отправлено на ваш почтовый адрес. ${code}`
 
     // if (!dto.code) {
     //   await this.twoFactorAuthService.sendTwoFactorToken(user.email)

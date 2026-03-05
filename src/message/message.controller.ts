@@ -10,7 +10,7 @@ export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
   @Authorization()
-  @Get('chat/:chatId')
+  @Get(':chatId')
   async getChatMessages(
     @Authorized('id') userId: string,
     @Param('chatId') chatId: string,

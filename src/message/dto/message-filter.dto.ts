@@ -1,4 +1,5 @@
-import { IsDateString, IsInt, IsOptional, IsString, Min } from 'class-validator'
+import { Type } from 'class-transformer'
+import { IsDateString, IsOptional, IsString, Min } from 'class-validator'
 
 export class MessageFilterDto {
   @IsString()
@@ -13,14 +14,14 @@ export class MessageFilterDto {
   @IsOptional()
   fromDate?: string
 
-  @IsOptional()
-  @IsInt()
+  @Type(() => Number)
   @Min(1)
+  @IsOptional()
   page?: number = 1
 
-  @IsOptional()
-  @IsInt()
+  @Type(() => Number)
   @Min(1)
+  @IsOptional()
   limit?: number = 50
 
   @IsString()

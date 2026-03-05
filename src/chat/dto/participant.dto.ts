@@ -1,4 +1,4 @@
-import { EnumMemberRole } from '@prisma/__generated__/enums'
+import { EnumMemberRole, EnumUserStatus } from '@prisma/__generated__/enums'
 import { Expose } from 'class-transformer'
 
 export class ParticipantDto {
@@ -19,6 +19,12 @@ export class ParticipantDto {
 
   @Expose()
   role: EnumMemberRole
+
+  @Expose()
+  status: EnumUserStatus
+
+  @Expose()
+  lastSeen: Date
 
   @Expose()
   joinedAt: Date

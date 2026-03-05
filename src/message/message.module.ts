@@ -14,11 +14,11 @@ import { MessageService } from './message.service'
   imports: [forwardRef(() => ChatModule), EventEmitterModule.forRoot()],
   controllers: [MessageController],
   providers: [
-    MessageGateway,
     MessageService,
     PrismaService,
     ChatService,
-    UserService
+    UserService,
+    MessageGateway
   ]
 })
 export class MessageModule {}

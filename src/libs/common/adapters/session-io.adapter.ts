@@ -33,10 +33,18 @@ export class SessionIoAdapter extends IoAdapter {
 
         const parsedCookies = parse(cookies)
         const sessionName = this.configService.get('SESSION_NAME')
-        const sessionId = parsedCookies[sessionName]
+        let sessionId = parsedCookies[sessionName]
 
         if (!sessionId) {
           return next(new Error('No session cookie'))
+        }
+
+        if (sessionId.startsWith('s:')) {
+          sessionId = sessionId.substring(2)
+        }
+        const dotIndex = sessionId.indexOf('.')
+        if (dotIndex !== -1) {
+          sessionId = sessionId.substring(0, dotIndex)
         }
 
         const sessionFolder = this.configService.get('SESSION_FOLDER')

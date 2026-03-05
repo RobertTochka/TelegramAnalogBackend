@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import {
   ConnectedSocket,
@@ -37,13 +38,15 @@ interface AuthenticatedSocket extends Socket {
     origin: process.env.ALLOWED_ORIGIN,
     credentials: true
   },
-  namespace: 'messages',
+  namespace: '/messages',
   transports: ['websocket', 'polling'],
   cookie: true
 })
 export class MessageGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
+  private readonly logger = new Logger(MessageGateway.name)
+
   @WebSocketServer()
   server: Server
 
@@ -58,7 +61,11 @@ export class MessageGateway
 
   async handleConnection(client: AuthenticatedSocket) {
     try {
+      this.logger.log(`Connection attempt from ${client.id}`)
+
       const userId = client.data.userId
+
+      this.logger.log(`User ID from socket data: ${userId}`)
 
       if (!userId) {
         client.disconnect()
@@ -82,7 +89,7 @@ export class MessageGateway
 
       console.log(`Client connected: ${client.id} (user: ${userId})`)
     } catch (error) {
-      console.error('Connection error:', error)
+      this.logger.error('Connection error')
       client.disconnect()
     }
   }
@@ -116,10 +123,12 @@ export class MessageGateway
     try {
       const userId = client.data.userId
 
+      this.logger.log(`Received message:send from user ${userId}`)
+
       const message = await this.messageService.create(userId, payload)
 
       this.server.to(`chat:${payload.chatId}`).emit('message:new', {
-        ...message,
+        message,
         tempId: payload.tempId // Для идентификации на клиенте
       })
 
@@ -200,7 +209,7 @@ export class MessageGateway
 
       client.to(`chat:${chatId}`).emit('typing', {
         chatId,
-        userId: userId,
+        userId,
         isTyping
       })
 

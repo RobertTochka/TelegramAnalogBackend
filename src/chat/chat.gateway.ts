@@ -21,7 +21,7 @@ interface AuthenticatedSocket extends Socket {
     origin: process.env.ALLOWED_ORIGIN,
     credentials: true
   },
-  namespace: 'chats',
+  namespace: '/chats',
   transports: ['websocket', 'polling'],
   cookie: true
 })

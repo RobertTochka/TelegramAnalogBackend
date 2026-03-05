@@ -8,6 +8,7 @@ import { EnumMessageStatus } from '@prisma/__generated__/enums'
 import { plainToInstance } from 'class-transformer'
 
 import { ChatService } from '@/chat/chat.service'
+import { PaginatedResponse } from '@/chat/dto'
 import { PrismaService } from '@/prisma.service'
 
 import { CreateMessageDto, MessageFilterDto, MessageResponseDto } from './dto'
@@ -287,10 +288,7 @@ export class MessageService {
     userId: string,
     chatId: string,
     filter: MessageFilterDto
-  ): Promise<{
-    messages: MessageResponseDto[]
-    total: number
-  }> {
+  ): Promise<PaginatedResponse<MessageResponseDto[]>> {
     const isMember = await this.chatService.isChatMember(chatId, userId)
     if (!isMember) {
       throw new ForbiddenException('Вы не являетесь участником этого чата')
@@ -312,7 +310,7 @@ export class MessageService {
         },
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: 'asc' },
         include: {
           sender: {
             select: {
@@ -353,9 +351,22 @@ export class MessageService {
       messages.map(m => m.id)
     )
 
+    const totalPages = Math.ceil(total / limit)
+    const hasNextPage = page < totalPages
+    const hasPreviousPage = page > 1
+
+    const data = messages.map(msg => this.mapToResponseDto(msg))
+
     return {
-      messages: messages.map(msg => this.mapToResponseDto(msg)),
-      total
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage
+      }
     }
   }
 
@@ -488,33 +499,40 @@ export class MessageService {
   //#region private methods
 
   private async connectReplyToOrForwardedFrom(mainMessage) {
-    const replyTo = await this.prismaService.message.findUnique({
-      where: { id: mainMessage.replyToId },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true
-          }
-        }
-      }
-    })
+    if (!mainMessage.replyToId && !mainMessage.forwardedFromId)
+      return mainMessage
 
-    const forwardedFrom = await this.prismaService.message.findUnique({
-      where: { id: mainMessage.forwardedFromId },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true
+    const replyTo = mainMessage.replyToId
+      ? await this.prismaService.message.findUnique({
+          where: { id: mainMessage.replyToId },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true
+              }
+            }
           }
-        }
-      }
-    })
+        })
+      : {}
+
+    const forwardedFrom = mainMessage.forwardedFromId
+      ? await this.prismaService.message.findUnique({
+          where: { id: mainMessage.forwardedFromId },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                avatar: true
+              }
+            }
+          }
+        })
+      : {}
 
     if (replyTo && forwardedFrom)
       throw new ForbiddenException(
