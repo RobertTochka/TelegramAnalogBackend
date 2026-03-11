@@ -173,11 +173,11 @@ export class ChatController {
    */
   @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Delete(':id/admins/:adminId')
+  @Delete(':id/admins')
   async removeAdmin(
     @Authorized('id') userId: string,
     @Param('id') id: string,
-    @Param('adminId') adminId: string
+    @Body() adminId: string
   ) {
     return this.chatService.removeAdmin(id, userId, adminId)
   }

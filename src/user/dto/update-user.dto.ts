@@ -45,8 +45,8 @@ export class UpdateUserDto {
   username?: string
 
   @IsString()
-  @MaxLength(20, {
-    message: 'Имя пользователя должно содержать максимум 20 символов'
+  @MaxLength(100, {
+    message: 'Описание пользователя должно содержать максимум 100 символов'
   })
   @IsOptional()
   description?: string

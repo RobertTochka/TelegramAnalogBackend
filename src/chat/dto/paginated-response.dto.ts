@@ -2,10 +2,8 @@ export class PaginatedResponse<T> {
   data: T
   meta: {
     total: number
-    page: number
     limit: number
-    totalPages: number
+    nextCursor: string | null
     hasNextPage: boolean
-    hasPreviousPage: boolean
   }
 }

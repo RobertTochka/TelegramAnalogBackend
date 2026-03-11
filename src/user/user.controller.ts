@@ -9,7 +9,7 @@ import {
   Post,
   Query
 } from '@nestjs/common'
-import { EnumUserRole } from '@prisma/__generated__/enums'
+import { EnumFriendshipStatus, EnumUserRole } from '@prisma/__generated__/enums'
 
 import { Authorization, Authorized } from '@/auth/decorators'
 
@@ -54,7 +54,7 @@ export class UserController {
   @Authorization()
   @HttpCode(HttpStatus.OK)
   @Get('profile/:userId')
-  public async findProfile(@Param() userId: string) {
+  public async findProfile(@Param('userId') userId: string) {
     return this.userService.findProfileById(userId)
   }
 
@@ -83,11 +83,11 @@ export class UserController {
   @Authorization()
   @HttpCode(HttpStatus.OK)
   @Patch('friends')
-  public async acceptFriendRequest(
+  public async patchFriendRequest(
     @Authorized('id') userId: string,
-    @Body() dto: { friendId: string }
+    @Body() dto: { friendId: string; status: EnumFriendshipStatus }
   ) {
-    return this.userService.acceptFriendRequest(userId, dto.friendId)
+    return this.userService.patchFriendRequest(userId, dto.friendId, dto.status)
   }
 
   @Authorization()

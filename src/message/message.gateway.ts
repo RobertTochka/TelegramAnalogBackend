@@ -278,22 +278,21 @@ export class MessageGateway
   @SubscribeMessage('messages:read')
   async handleMarkAsRead(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: { chatId: string; messageIds?: string[] }
+    @MessageBody() payload: { chatId: string; messageIds: string[] }
   ) {
     try {
       const userId = client.data.userId
 
-      await this.messageService.markAsRead(
+      const messages = await this.messageService.markAsRead(
         userId,
         payload.chatId,
         payload.messageIds
       )
 
       // Уведомляем участников чата о прочтении
-      this.server.to(`chat:${payload.chatId}`).emit('messages:read', {
+      this.server.to(`chat:${payload.chatId}`).emit('messages:read:updated', {
         chatId: payload.chatId,
-        userId,
-        messageIds: payload.messageIds,
+        messages,
         readAt: new Date()
       })
 

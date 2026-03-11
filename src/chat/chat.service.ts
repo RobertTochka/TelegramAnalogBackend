@@ -55,8 +55,27 @@ export class ChatService {
       }
     }
 
-    if (type === EnumChatType.GROUP && !name) {
-      throw new BadRequestException('Ведите название чата')
+    if (type === EnumChatType.CHANNEL) {
+      if (!name) throw new BadRequestException('Ведите название канала')
+
+      const userGroups = await this.findAll(userId, {
+        type: EnumChatType.CHANNEL
+      })
+
+      // TODO: Сделать запрос на разрешение на создание канала
+      if (userGroups.data.length >= 2)
+        throw new ForbiddenException('Вы не можете создать более 2 каналов')
+    }
+
+    if (type === EnumChatType.GROUP) {
+      if (!name) throw new BadRequestException('Ведите название чата')
+
+      const userChats = await this.findAll(userId, {
+        type: EnumChatType.GROUP
+      })
+
+      if (userChats.data.length >= 20)
+        throw new ForbiddenException('Вы не можете создать более 20 чатов')
     }
 
     const allParticipantIds = [userId, ...participantIds]
@@ -129,10 +148,9 @@ export class ChatService {
       isArchived,
       isMuted,
       search,
-      page = 1,
+      cursor,
       limit = 20
     } = filter
-    const skip = (page - 1) * limit
 
     // Базовый WHERE для чатов пользователя
     const where: Prisma.ChatWhereInput = {
@@ -178,19 +196,22 @@ export class ChatService {
         data: [],
         meta: {
           total: 0,
-          page,
           limit,
-          totalPages: 0,
-          hasNextPage: false,
-          hasPreviousPage: false
+          nextCursor: null,
+          hasNextPage: false
         }
       }
     }
 
     let chats = await this.prismaService.chat.findMany({
       where,
-      skip,
       take: limit,
+      ...(cursor && {
+        skip: 1,
+        cursor: {
+          id: cursor
+        }
+      }),
       orderBy: [
         { pinnedChats: { _count: 'desc' } }, // Сначала закрепленные
         { updatedAt: 'desc' },
@@ -253,23 +274,20 @@ export class ChatService {
 
     const unreadCounts = await this.getUnreadCounts(userId)
 
-    const totalPages = Math.ceil(total / limit)
-    const hasNextPage = page < totalPages
-    const hasPreviousPage = page > 1
-
     const data = chats.map(chat =>
       this.mapToResponseDto(chat, unreadCounts[chat.id] || 0)
     )
+
+    const nextCursor =
+      chats.length === limit ? chats[chats.length - 1].id : null
 
     return {
       data,
       meta: {
         total,
-        page,
         limit,
-        totalPages,
-        hasNextPage,
-        hasPreviousPage
+        nextCursor,
+        hasNextPage: !!nextCursor
       }
     }
   }

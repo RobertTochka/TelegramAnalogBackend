@@ -14,10 +14,9 @@ export class MessageFilterDto {
   @IsOptional()
   fromDate?: string
 
-  @Type(() => Number)
-  @Min(1)
+  @IsString()
   @IsOptional()
-  page?: number = 1
+  cursor?: string
 
   @Type(() => Number)
   @Min(1)

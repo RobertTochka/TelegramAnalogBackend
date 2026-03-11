@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException
 } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
@@ -15,6 +16,8 @@ import { CreateMessageDto, MessageFilterDto, MessageResponseDto } from './dto'
 
 @Injectable()
 export class MessageService {
+  private readonly logger = new Logger(MessageService.name)
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly chatService: ChatService,
@@ -59,7 +62,13 @@ export class MessageService {
             senderId: userId,
             content,
             replyToId,
-            forwardedFromId
+            forwardedFromId,
+            statuses: {
+              create: chatMembers.map(member => ({
+                userId: member.userId,
+                status: EnumMessageStatus.DELIVERED
+              }))
+            }
           },
           include: {
             sender: {
@@ -70,22 +79,12 @@ export class MessageService {
                 avatar: true
               }
             },
-            media: true
+            media: true,
+            statuses: true
           }
         })
 
         const newMessage = await this.connectReplyToOrForwardedFrom(mainMessage)
-
-        await prismaService.messageStatus.createMany({
-          data: chatMembers.map(member => ({
-            messageId: newMessage.id,
-            userId: member.userId,
-            status:
-              member.userId === userId
-                ? EnumMessageStatus.READ
-                : EnumMessageStatus.SENT
-          }))
-        })
 
         await prismaService.chat.update({
           where: { id: chatId },
@@ -174,6 +173,7 @@ export class MessageService {
     const updatedMessage = await this.prismaService.message.update({
       where: { id: messageId },
       data: {
+        isEdited: true,
         content: content,
         updatedAt: new Date()
       },
@@ -267,19 +267,36 @@ export class MessageService {
     })
   }
 
-  async markAsRead(userId: string, chatId: string, messageIds?: string[]) {
+  async markAsRead(userId: string, chatId: string, messageIds: string[]) {
+    const messages = await this.prismaService.message.findMany({
+      where: {
+        id: { in: messageIds }
+      },
+      select: {
+        id: true,
+        sender: {
+          select: {
+            id: true
+          }
+        }
+      }
+    })
+
+    const senders = messages.map(msg => msg.sender.id)
+
     await this.prismaService.messageStatus.updateMany({
       where: {
-        userId,
-        status: { in: [EnumMessageStatus.SENT, EnumMessageStatus.DELIVERED] },
+        userId: { in: [userId, ...senders] },
+        status: EnumMessageStatus.DELIVERED,
         message: {
-          chatId,
-          senderId: { not: userId }
+          chatId
         },
-        ...(messageIds && { messageId: { in: messageIds } })
+        messageId: { in: messageIds }
       },
       data: { status: EnumMessageStatus.READ }
     })
+
+    return messages
   }
 
   //#region controller methods
@@ -294,8 +311,7 @@ export class MessageService {
       throw new ForbiddenException('Вы не являетесь участником этого чата')
     }
 
-    const { page = 1, limit = 50, fromDate, search } = filter
-    const skip = (page - 1) * limit
+    const { limit = 50, fromDate, search, cursor } = filter
 
     const messagesPromise = this.prismaService.message
       .findMany({
@@ -308,9 +324,14 @@ export class MessageService {
             content: { contains: search, mode: 'insensitive' }
           })
         },
-        skip,
         take: limit,
-        orderBy: { createdAt: 'asc' },
+        ...(cursor && {
+          skip: 1,
+          cursor: {
+            id: cursor
+          }
+        }),
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         include: {
           sender: {
             select: {
@@ -323,7 +344,10 @@ export class MessageService {
           media: true,
           statuses: {
             where: { userId },
-            select: { status: true }
+            select: {
+              userId: true,
+              status: true
+            }
           }
         }
       })
@@ -351,21 +375,18 @@ export class MessageService {
       messages.map(m => m.id)
     )
 
-    const totalPages = Math.ceil(total / limit)
-    const hasNextPage = page < totalPages
-    const hasPreviousPage = page > 1
-
     const data = messages.map(msg => this.mapToResponseDto(msg))
+
+    const nextCursor =
+      messages.length === limit ? messages[messages.length - 1].id : null
 
     return {
       data,
       meta: {
         total,
-        page,
         limit,
-        totalPages,
-        hasNextPage,
-        hasPreviousPage
+        nextCursor,
+        hasNextPage: !!nextCursor
       }
     }
   }
@@ -516,7 +537,7 @@ export class MessageService {
             }
           }
         })
-      : {}
+      : undefined
 
     const forwardedFrom = mainMessage.forwardedFromId
       ? await this.prismaService.message.findUnique({
@@ -532,7 +553,7 @@ export class MessageService {
             }
           }
         })
-      : {}
+      : undefined
 
     if (replyTo && forwardedFrom)
       throw new ForbiddenException(

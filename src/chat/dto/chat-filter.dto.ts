@@ -33,11 +33,9 @@ export class ChatFilterDto {
   @IsOptional()
   search?: string
 
+  @IsString()
   @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Type(() => Number)
-  page?: number = 1
+  cursor?: string
 
   @IsOptional()
   @IsInt()

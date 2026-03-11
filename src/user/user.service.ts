@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException
 } from '@nestjs/common'
 import { EnumFriendshipStatus } from '@prisma/__generated__/enums'
@@ -20,6 +21,8 @@ import {
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name)
+
   public constructor(private readonly prismaService: PrismaService) {}
 
   async findAll(params: SearchUsersDto) {
@@ -76,7 +79,6 @@ export class UserService {
         id
       },
       include: {
-        // Друзья, где пользователь является инициатором
         friendships: {
           where: {
             status: 'ACCEPTED'
@@ -155,7 +157,7 @@ export class UserService {
         lastSeen: true,
         friendships: {
           where: {
-            status: 'ACCEPTED'
+            status: EnumFriendshipStatus.ACCEPTED
           },
           select: {
             friend: {
@@ -173,7 +175,7 @@ export class UserService {
         },
         friendOf: {
           where: {
-            status: 'ACCEPTED'
+            status: EnumFriendshipStatus.ACCEPTED
           },
           select: {
             user: {
@@ -251,7 +253,16 @@ export class UserService {
   }
 
   public async update(userId: string, dto: UpdateUserDto) {
-    const user = await this.findById(userId)
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+
+    if (!user)
+      throw new NotFoundException(
+        'Пользователь не найден. Пожалуйста, проверьте введенные данные.'
+      )
 
     if (dto.username) {
       const isExist = await this.prismaService.user.findUnique({
@@ -306,6 +317,7 @@ export class UserService {
 
   // Отправить запрос в друзья
   public async sendFriendRequest(userId: string, friendId: string) {
+    this.logger.log('1')
     if (userId === friendId) {
       throw new ConflictException('Нельзя добавить самого себя в друзья')
     }
@@ -351,7 +363,11 @@ export class UserService {
   }
 
   // Принять запрос в друзья
-  async acceptFriendRequest(userId: string, friendId: string) {
+  async patchFriendRequest(
+    userId: string,
+    friendId: string,
+    status: EnumFriendshipStatus
+  ) {
     await this.prismaService.friendship.update({
       where: {
         userId_friendId: {
@@ -360,7 +376,7 @@ export class UserService {
         }
       },
       data: {
-        status: EnumFriendshipStatus.ACCEPTED
+        status
       }
     })
   }
