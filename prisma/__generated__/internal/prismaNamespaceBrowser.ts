@@ -62,6 +62,7 @@ export const ModelName = {
   ArchivedChat: 'ArchivedChat',
   PinnedChat: 'PinnedChat',
   MutedChat: 'MutedChat',
+  InviteLink: 'InviteLink',
   Token: 'Token'
 } as const
 
@@ -121,7 +122,6 @@ export const ChatScalarFieldEnum = {
   name: 'name',
   description: 'description',
   avatar: 'avatar',
-  inviteLink: 'inviteLink',
   pinnedMessageId: 'pinnedMessageId',
   lastMessageId: 'lastMessageId',
   isPrivate: 'isPrivate',
@@ -129,6 +129,7 @@ export const ChatScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt',
+  inviteLinkId: 'inviteLinkId',
   createdById: 'createdById'
 } as const
 
@@ -228,6 +229,17 @@ export const MutedChatScalarFieldEnum = {
 } as const
 
 export type MutedChatScalarFieldEnum = (typeof MutedChatScalarFieldEnum)[keyof typeof MutedChatScalarFieldEnum]
+
+
+export const InviteLinkScalarFieldEnum = {
+  id: 'id',
+  link: 'link',
+  chatId: 'chatId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type InviteLinkScalarFieldEnum = (typeof InviteLinkScalarFieldEnum)[keyof typeof InviteLinkScalarFieldEnum]
 
 
 export const TokenScalarFieldEnum = {

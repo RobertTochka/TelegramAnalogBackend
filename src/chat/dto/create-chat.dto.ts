@@ -33,7 +33,6 @@ export class CreateChatDto {
   type: EnumChatType
 
   @IsArray()
-  @ArrayMinSize(1, { message: 'Чат должен содержать хотя бы одного участника' })
   participantIds: string[]
 
   @IsBoolean()

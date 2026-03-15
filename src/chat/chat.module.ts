@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 
 import { MessageModule } from '@/message/message.module'
@@ -12,6 +13,12 @@ import { ChatService } from './chat.service'
 @Module({
   imports: [forwardRef(() => MessageModule), EventEmitterModule.forRoot()],
   controllers: [ChatController],
-  providers: [ChatService, PrismaService, ChatGateway, UserService]
+  providers: [
+    ChatService,
+    PrismaService,
+    ChatGateway,
+    UserService,
+    ConfigService
+  ]
 })
 export class ChatModule {}

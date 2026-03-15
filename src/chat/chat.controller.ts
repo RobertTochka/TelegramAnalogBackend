@@ -57,19 +57,6 @@ export class ChatController {
   }
 
   /**
-   * Присоединение к чату по пригласительной ссылке
-   */
-  @Authorization()
-  @HttpCode(HttpStatus.OK)
-  @Get('join/:inviteLink')
-  async joinByInviteLink(
-    @Authorized('id') userId: string,
-    @Param('inviteLink') inviteLink: string
-  ) {
-    return this.chatService.joinByInviteLink(inviteLink, userId)
-  }
-
-  /**
    * Получение чата по ID
    */
   @Authorization()
@@ -121,13 +108,13 @@ export class ChatController {
    */
   @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Post(':id/participants')
+  @Put(':id/participants')
   async addParticipants(
     @Authorized('id') userId: string,
     @Param('id') id: string,
-    @Body() pdarticipantIds: string[]
+    @Body() { participantIds }: { participantIds: string[] }
   ) {
-    return this.chatService.addParticipants(id, userId, pdarticipantIds)
+    return this.chatService.addParticipants(id, userId, participantIds)
   }
 
   /**
@@ -135,11 +122,11 @@ export class ChatController {
    */
   @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Delete(':id/participants')
+  @Post(':id/participants')
   async removeParticipants(
     @Authorized('id') userId: string,
     @Param('id') id: string,
-    @Body() participantIds: string[]
+    @Body() { participantIds }: { participantIds: string[] }
   ) {
     await this.chatService.removeParticipants(id, userId, participantIds)
   }
@@ -163,7 +150,7 @@ export class ChatController {
   async addAdmin(
     @Authorized('id') userId: string,
     @Param('id') id: string,
-    @Body() newAdminId: string
+    @Body() { newAdminId }: { newAdminId: string }
   ) {
     return this.chatService.addAdmin(id, userId, newAdminId)
   }
@@ -229,22 +216,25 @@ export class ChatController {
    */
   @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Post(':id/invite')
+  @Get(':id/invite-link')
   async createInviteLink(
     @Authorized('id') userId: string,
     @Param('id') id: string,
-    @Body() expiresAt: Date
+    @Body() expiresAt?: Date
   ) {
     return this.chatService.createInviteLink(id, userId, expiresAt)
   }
 
   /**
-   * Отметить сообщения как прочитанные
+   * Присоединение к чату по пригласительной ссылке
    */
   @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Post(':id/read')
-  async markAsRead(@Authorized('id') userId: string, @Param('id') id: string) {
-    await this.chatService.updateLastReadAt(id, userId)
+  @Post('join/:inviteLink')
+  async joinByInviteLink(
+    @Authorized('id') userId: string,
+    @Param('inviteLink') inviteLink: string
+  ) {
+    return this.chatService.joinByInviteLink(inviteLink, userId)
   }
 }

@@ -5,7 +5,10 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
-import { EnumFriendshipStatus } from '@prisma/__generated__/enums'
+import {
+  EnumFriendshipStatus,
+  EnumUserStatus
+} from '@prisma/__generated__/enums'
 import { hash, verify } from 'argon2'
 
 import { PrismaService } from '@/prisma.service'
@@ -311,6 +314,74 @@ export class UserService {
         password: newPassword
       }
     })
+  }
+
+  public async updateUserStatus(userId: string, status: EnumUserStatus) {
+    await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        status,
+        lastSeen: new Date()
+      }
+    })
+  }
+
+  public async getUsersStatuses(
+    userIds: string[],
+    userSockets: Map<string, Set<string>>
+  ) {
+    if (userIds.length === 0) {
+      return {}
+    }
+
+    const uniqueUserIds = [...new Set(userIds)]
+
+    const usersFromDb = await this.prismaService.user.findMany({
+      where: {
+        id: { in: uniqueUserIds }
+      },
+      select: {
+        id: true,
+        status: true,
+        lastSeen: true
+      }
+    })
+
+    const dbUsersMap = new Map(
+      usersFromDb.map(user => [
+        user.id,
+        {
+          status: user.status,
+          lastSeen: user.lastSeen
+        }
+      ])
+    )
+
+    const result: Record<
+      string,
+      { status: EnumUserStatus; lastSeen: Date | null }
+    > = {}
+
+    for (const userId of uniqueUserIds) {
+      const isOnline =
+        userSockets.has(userId) && userSockets.get(userId)!.size > 0
+
+      if (isOnline) {
+        result[userId] = {
+          status: 'ONLINE',
+          lastSeen: new Date()
+        }
+      } else {
+        const dbUser = dbUsersMap.get(userId)
+
+        result[userId] = dbUser || {
+          status: 'OFFLINE',
+          lastSeen: new Date()
+        }
+      }
+    }
+
+    return result
   }
 
   //#region friends

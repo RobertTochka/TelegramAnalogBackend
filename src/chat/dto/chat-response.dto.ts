@@ -1,6 +1,7 @@
 import { EnumChatType } from '@prisma/__generated__/enums'
 import { Expose, Type } from 'class-transformer'
 
+import { InviteLinkDto } from './invite-link.dto'
 import { MessageDto } from './message.dto'
 import { ParticipantDto } from './participant.dto'
 
@@ -31,7 +32,8 @@ export class ChatResponseDto {
   isPrivate: boolean
 
   @Expose()
-  inviteLink?: string
+  @Type(() => InviteLinkDto)
+  inviteLink?: InviteLinkDto
 
   @Expose()
   @Type(() => ParticipantDto)

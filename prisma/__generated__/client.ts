@@ -93,6 +93,11 @@ export type PinnedChat = Prisma.PinnedChatModel
  */
 export type MutedChat = Prisma.MutedChatModel
 /**
+ * Model InviteLink
+ * 
+ */
+export type InviteLink = Prisma.InviteLinkModel
+/**
  * Model Token
  * 
  */

@@ -9,14 +9,12 @@ import { createClient } from 'redis'
 import { AppModule } from './app.module'
 import { SessionIoAdapter } from './libs/common/adapters'
 import { isDev, ms, parseBoolean, StringValue } from './libs/common/utils'
+import { REDIS_CLIENT } from './redis/RedisModule'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
   const config = app.get(ConfigService)
-  const redis = createClient({ url: config.getOrThrow<string>('REDIS_URI') })
-
-  redis.on('error', err => console.error('Redis Client Error ', err))
-  await redis.connect()
+  const redis = app.get(REDIS_CLIENT)
 
   app.useWebSocketAdapter(new SessionIoAdapter(app, config, redis))
 

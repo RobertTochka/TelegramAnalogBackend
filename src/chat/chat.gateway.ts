@@ -1,7 +1,11 @@
+import { Logger } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import {
+  ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer
 } from '@nestjs/websockets'
@@ -9,10 +13,11 @@ import { Server, Socket } from 'socket.io'
 
 import { PrismaService } from '@/prisma.service'
 
+import { ChatService } from './chat.service'
+
 interface AuthenticatedSocket extends Socket {
-  user: {
-    id: string
-    username: string
+  data: {
+    userId: string
   }
 }
 
@@ -29,27 +34,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server
 
+  private logger = new Logger(ChatGateway.name)
+
   private userSockets: Map<string, Set<string>> = new Map() // userId -> Set socketId
 
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private chatService: ChatService
+  ) {}
 
   async handleConnection(client: AuthenticatedSocket) {
     try {
-      const user = client.user
+      this.logger.log(`Connection attempt from ${client.id}`)
 
-      if (!user) {
+      const userId = client.data.userId
+
+      this.logger.log(`User ID from socket data: ${userId}`)
+
+      if (!userId) {
         client.disconnect()
         return
       }
 
-      if (!this.userSockets.has(user.id)) {
-        this.userSockets.set(user.id, new Set())
+      if (!this.userSockets.has(userId)) {
+        this.userSockets.set(userId, new Set())
       }
-      this.userSockets.get(user.id).add(client.id)
+      this.userSockets.get(userId).add(client.id)
 
-      console.log(
-        `Notifications client connected: ${client.id} (user: ${user.username})`
-      )
+      console.log(`Client connected: ${client.id} (user: ${userId})`)
     } catch (error) {
       console.error('Connection error:', error)
       client.disconnect()
@@ -57,14 +69,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   async handleDisconnect(client: AuthenticatedSocket) {
-    const user = client.user
+    const userId = client.data.userId
 
-    if (user) {
-      const userSockets = this.userSockets.get(user.id)
+    if (userId) {
+      const userSockets = this.userSockets.get(userId)
       if (userSockets) {
         userSockets.delete(client.id)
         if (userSockets.size === 0) {
-          this.userSockets.delete(user.id)
+          this.userSockets.delete(userId)
         }
       }
     }
@@ -139,15 +151,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleParticipantsAdded(payload: {
     chatId: string
     newParticipantIds: string[]
-    addedBy: string
     chat: any
   }) {
-    const { chatId, newParticipantIds, addedBy, chat } = payload
+    const { chatId, newParticipantIds, chat } = payload
 
     this.notifyUsers(newParticipantIds, 'chat:added', {
       chatId,
       chat,
-      addedBy,
       message: 'Вас добавили в чат'
     })
   }
@@ -156,13 +166,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleParticipantsRemoved(payload: {
     chatId: string
     removedParticipantIds: string[]
-    removedBy: string
   }) {
-    const { chatId, removedParticipantIds, removedBy } = payload
+    const { chatId, removedParticipantIds } = payload
 
     this.notifyUsers(removedParticipantIds, 'chat:removed', {
       chatId,
-      removedBy,
       message: 'Вас удалили из чата'
     })
   }

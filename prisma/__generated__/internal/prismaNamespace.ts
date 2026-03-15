@@ -395,6 +395,7 @@ export const ModelName = {
   ArchivedChat: 'ArchivedChat',
   PinnedChat: 'PinnedChat',
   MutedChat: 'MutedChat',
+  InviteLink: 'InviteLink',
   Token: 'Token'
 } as const
 
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "friendship" | "chat" | "chatMember" | "chatAdmin" | "message" | "messageStatus" | "media" | "archivedChat" | "pinnedChat" | "mutedChat" | "token"
+    modelProps: "user" | "friendship" | "chat" | "chatMember" | "chatAdmin" | "message" | "messageStatus" | "media" | "archivedChat" | "pinnedChat" | "mutedChat" | "inviteLink" | "token"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1229,6 +1230,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    InviteLink: {
+      payload: Prisma.$InviteLinkPayload<ExtArgs>
+      fields: Prisma.InviteLinkFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InviteLinkFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InviteLinkFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload>
+        }
+        findFirst: {
+          args: Prisma.InviteLinkFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InviteLinkFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload>
+        }
+        findMany: {
+          args: Prisma.InviteLinkFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload>[]
+        }
+        create: {
+          args: Prisma.InviteLinkCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload>
+        }
+        createMany: {
+          args: Prisma.InviteLinkCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InviteLinkCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload>[]
+        }
+        delete: {
+          args: Prisma.InviteLinkDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload>
+        }
+        update: {
+          args: Prisma.InviteLinkUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload>
+        }
+        deleteMany: {
+          args: Prisma.InviteLinkDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InviteLinkUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InviteLinkUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload>[]
+        }
+        upsert: {
+          args: Prisma.InviteLinkUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InviteLinkPayload>
+        }
+        aggregate: {
+          args: Prisma.InviteLinkAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInviteLink>
+        }
+        groupBy: {
+          args: Prisma.InviteLinkGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InviteLinkGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InviteLinkCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InviteLinkCountAggregateOutputType> | number
+        }
+      }
+    }
     Token: {
       payload: Prisma.$TokenPayload<ExtArgs>
       fields: Prisma.TokenFieldRefs
@@ -1382,7 +1457,6 @@ export const ChatScalarFieldEnum = {
   name: 'name',
   description: 'description',
   avatar: 'avatar',
-  inviteLink: 'inviteLink',
   pinnedMessageId: 'pinnedMessageId',
   lastMessageId: 'lastMessageId',
   isPrivate: 'isPrivate',
@@ -1390,6 +1464,7 @@ export const ChatScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt',
+  inviteLinkId: 'inviteLinkId',
   createdById: 'createdById'
 } as const
 
@@ -1489,6 +1564,17 @@ export const MutedChatScalarFieldEnum = {
 } as const
 
 export type MutedChatScalarFieldEnum = (typeof MutedChatScalarFieldEnum)[keyof typeof MutedChatScalarFieldEnum]
+
+
+export const InviteLinkScalarFieldEnum = {
+  id: 'id',
+  link: 'link',
+  chatId: 'chatId',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type InviteLinkScalarFieldEnum = (typeof InviteLinkScalarFieldEnum)[keyof typeof InviteLinkScalarFieldEnum]
 
 
 export const TokenScalarFieldEnum = {
@@ -1827,6 +1913,7 @@ export type GlobalOmitConfig = {
   archivedChat?: Prisma.ArchivedChatOmit
   pinnedChat?: Prisma.PinnedChatOmit
   mutedChat?: Prisma.MutedChatOmit
+  inviteLink?: Prisma.InviteLinkOmit
   token?: Prisma.TokenOmit
 }
 

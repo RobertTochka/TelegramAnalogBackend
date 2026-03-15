@@ -6,6 +6,7 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { Prisma } from '@prisma/__generated__/client'
 import { EnumChatType, EnumMemberRole } from '@prisma/__generated__/enums'
@@ -29,6 +30,7 @@ export class ChatService {
 
   constructor(
     private prismaService: PrismaService,
+    private configService: ConfigService,
     private eventEmitter: EventEmitter2
   ) {}
 
@@ -88,10 +90,7 @@ export class ChatService {
           description,
           avatar,
           isPrivate: isPrivate || false,
-          createdById: userId,
-          ...(type === EnumChatType.GROUP && {
-            inviteLink: this.generateInviteLink()
-          })
+          createdById: userId
         }
       })
 
@@ -233,6 +232,12 @@ export class ChatService {
             }
           }
         },
+        inviteLink: {
+          select: {
+            link: true,
+            expiresAt: true
+          }
+        },
         archivedBy: {
           where: { userId },
           select: { archivedAt: true }
@@ -314,6 +319,12 @@ export class ChatService {
             }
           }
         },
+        inviteLink: {
+          select: {
+            link: true,
+            expiresAt: true
+          }
+        },
         createdBy: {
           select: {
             id: true,
@@ -376,6 +387,17 @@ export class ChatService {
   ): Promise<ChatResponseDto> {
     await this.checkAdminPermission(chatId, userId)
 
+    await this.prismaService.chat.update({
+      where: {
+        id: chatId
+      },
+      data: {
+        ...updateChatDto
+      }
+    })
+
+    const updatedChat = await this.findOne(chatId, userId)
+
     // Создаем системное сообщение об изменении
     if (updateChatDto.name || updateChatDto.description) {
       await this.prismaService.message.create({
@@ -388,7 +410,7 @@ export class ChatService {
       })
     }
 
-    return this.findOne(chatId, userId)
+    return updatedChat
   }
 
   /**
@@ -507,7 +529,6 @@ export class ChatService {
     this.eventEmitter.emit('chat.participants.added', {
       chatId,
       newParticipantIds: participantIds,
-      addedBy: userId,
       chat: updatedChat
     })
 
@@ -535,6 +556,16 @@ export class ChatService {
     if (owner) {
       throw new ForbiddenException('Нельзя удалить владельца чата')
     }
+
+    const existingParticipants = await this.prismaService.chatMember.findMany({
+      where: {
+        chatId,
+        userId: { in: participantIds }
+      }
+    })
+
+    if (existingParticipants.length < participantIds.length)
+      throw new ForbiddenException('Некоторых участников нет в чате')
 
     await this.prismaService.chatMember.deleteMany({
       where: {
@@ -591,8 +622,7 @@ export class ChatService {
     // Эмитим событие об удалении участников
     this.eventEmitter.emit('chat.participants.removed', {
       chatId,
-      removedParticipantIds: participantIds,
-      removedBy: userId
+      removedParticipantIds: participantIds
     })
 
     return updatedChat
@@ -900,32 +930,50 @@ export class ChatService {
     chatId: string,
     userId: string,
     expiresAt?: Date
-  ): Promise<{ link: string; expiresAt: Date }> {
-    await this.checkAdminPermission(chatId, userId)
-
+  ): Promise<string> {
     const chat = await this.prismaService.chat.findUnique({
-      where: { id: chatId }
+      where: { id: chatId },
+      include: {
+        inviteLink: {
+          select: {
+            link: true,
+            expiresAt: true
+          }
+        }
+      }
     })
 
     if (!chat) {
       throw new NotFoundException('Чат не найден')
     }
 
-    const link = this.generateInviteLink()
+    if (chat.isPrivate) await this.checkAdminPermission(chatId, userId)
+
+    const existingLink = chat.inviteLink
+
+    if (existingLink && existingLink.expiresAt >= new Date(Date.now()))
+      return `${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/chats/join/${existingLink.link}`
+
+    const newlink = this.generateInviteLink()
 
     const expirationDate = expiresAt || new Date(Date.now() + ms('2d'))
+
+    const createdLink = await this.prismaService.inviteLink.create({
+      data: {
+        link: newlink,
+        expiresAt: expirationDate,
+        chatId: chat.id
+      }
+    })
 
     await this.prismaService.chat.update({
       where: { id: chatId },
       data: {
-        inviteLink: link
+        inviteLinkId: createdLink.id
       }
     })
 
-    return {
-      link: `${process.env.CLIENT_URL}/join/${link}`,
-      expiresAt: expirationDate
-    }
+    return `${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/chats/join/${newlink}`
   }
 
   /**
@@ -935,19 +983,23 @@ export class ChatService {
     inviteLink: string,
     userId: string
   ): Promise<ChatResponseDto> {
-    const chat = await this.prismaService.chat.findUnique({
-      where: { inviteLink }
+    const link = await this.prismaService.inviteLink.findUnique({
+      where: {
+        link: inviteLink
+      }
     })
 
-    if (!chat) {
-      throw new NotFoundException('Пригласительная ссылка недействительна')
-    }
+    if (new Date(link.expiresAt) <= new Date(Date.now()))
+      throw new ForbiddenException('Пригласительная ссылка недействительна')
 
-    if (chat.isPrivate) {
-      throw new ForbiddenException(
-        'Это приватный чат, присоединение по ссылке запрещено'
-      )
-    }
+    const chat = await this.prismaService.chat.findUnique({
+      where: {
+        inviteLinkId: link.id
+      }
+    })
+
+    if (!chat)
+      throw new ForbiddenException('Пригласительная ссылка недействительна')
 
     const existingMember = await this.prismaService.chatMember.findUnique({
       where: {
@@ -983,9 +1035,9 @@ export class ChatService {
     const updatedChat = await this.findOne(chat.id, userId)
 
     // Эмитим событие о новом участнике
-    this.eventEmitter.emit('chat.participant.joined', {
+    this.eventEmitter.emit('chat.participant.added', {
       chatId: chat.id,
-      userId,
+      newParticipantIds: [userId],
       chat: updatedChat
     })
 
@@ -1060,21 +1112,6 @@ export class ChatService {
     }
 
     return counts
-  }
-
-  /**
-   * Обновление времени последнего прочтения
-   */
-  async updateLastReadAt(chatId: string, userId: string): Promise<void> {
-    await this.prismaService.chatMember.update({
-      where: {
-        chatId_userId: {
-          chatId,
-          userId
-        }
-      },
-      data: { lastReadAt: new Date() }
-    })
   }
 
   //#region private methods

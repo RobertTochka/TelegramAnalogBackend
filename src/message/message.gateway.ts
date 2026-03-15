@@ -182,6 +182,7 @@ export class MessageGateway
       )
 
       this.server.to(`chat:${message.chatId}`).emit('message:deleted', {
+        chatId: message.chatId,
         messageId: payload.messageId,
         forEveryone: payload.forEveryone,
         deletedBy: userId
@@ -264,6 +265,7 @@ export class MessageGateway
         userId
       )
       this.server.to(`chat:${message.chatId}`).emit('message:status:updated', {
+        chatId: message.chatId,
         messageId: payload.messageId,
         status: payload.status,
         userId
@@ -278,7 +280,7 @@ export class MessageGateway
   @SubscribeMessage('messages:read')
   async handleMarkAsRead(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() payload: { chatId: string; messageIds: string[] }
+    @MessageBody() payload: { chatId: string; messageIds?: string[] }
   ) {
     try {
       const userId = client.data.userId
@@ -300,47 +302,5 @@ export class MessageGateway
     } catch (error) {
       throw new WsException(error.message)
     }
-  }
-
-  /**
-   * Отправка уведомления конкретному пользователю
-   */
-  private notifyUser(userId: string, event: string, data: any) {
-    const sockets = this.userSockets.get(userId)
-    if (sockets) {
-      sockets.forEach(socketId => {
-        this.server.to(socketId).emit(event, data)
-      })
-    }
-  }
-
-  /**
-   * Отправка уведомления нескольким пользователям
-   */
-  private notifyUsers(userIds: string[], event: string, data: any) {
-    userIds.forEach(userId => {
-      this.notifyUser(userId, event, data)
-    })
-  }
-
-  /**
-   * Событие: новое сообщение
-   */
-  @OnEvent('message.created')
-  handleNewMessage(payload: {
-    message: any
-    chatId: string
-    participantIds: string[]
-    senderId: string
-  }) {
-    const { message, chatId, participantIds, senderId } = payload
-
-    const notifyUserIds = participantIds.filter(id => id !== senderId)
-
-    this.notifyUsers(notifyUserIds, 'message:new', {
-      chatId,
-      message,
-      senderId
-    })
   }
 }

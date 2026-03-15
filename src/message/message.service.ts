@@ -5,6 +5,7 @@ import {
   NotFoundException
 } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
+import { Prisma } from '@prisma/__generated__/client'
 import { EnumMessageStatus } from '@prisma/__generated__/enums'
 import { plainToInstance } from 'class-transformer'
 
@@ -96,14 +97,6 @@ export class MessageService {
     )
 
     const messageDto = this.mapToResponseDto(message)
-
-    // Эмитим событие о новом сообщении
-    this.eventEmitter.emit('message.created', {
-      message: messageDto,
-      chatId,
-      participantIds,
-      senderId: userId
-    })
 
     return messageDto
   }
@@ -267,7 +260,26 @@ export class MessageService {
     })
   }
 
-  async markAsRead(userId: string, chatId: string, messageIds: string[]) {
+  async markAsRead(userId: string, chatId: string, messageIds?: string[]) {
+    if (!messageIds || messageIds.length === 0) {
+      const msgIds = await this.prismaService.messageStatus.findMany({
+        where: {
+          userId,
+          status: { in: [EnumMessageStatus.SENT, EnumMessageStatus.DELIVERED] },
+          message: {
+            chatId,
+            senderId: { not: userId },
+            deletedAt: null
+          }
+        },
+        select: {
+          messageId: true
+        }
+      })
+
+      messageIds = msgIds.map(m => m.messageId)
+    }
+
     const messages = await this.prismaService.message.findMany({
       where: {
         id: { in: messageIds }
@@ -282,7 +294,7 @@ export class MessageService {
       }
     })
 
-    const senders = messages.map(msg => msg.sender.id)
+    const senders = [...new Set(messages.map(msg => msg.sender.id))]
 
     await this.prismaService.messageStatus.updateMany({
       where: {
@@ -294,6 +306,16 @@ export class MessageService {
         messageId: { in: messageIds }
       },
       data: { status: EnumMessageStatus.READ }
+    })
+
+    await this.prismaService.chatMember.update({
+      where: {
+        chatId_userId: {
+          chatId,
+          userId
+        }
+      },
+      data: { lastReadAt: new Date() }
     })
 
     return messages
