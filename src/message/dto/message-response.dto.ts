@@ -1,6 +1,7 @@
 import { EnumMessageStatus } from '@prisma/__generated__/enums'
 import { Expose, Type } from 'class-transformer'
 
+import { MediaResponseDto } from './media-response.dto'
 import { SenderDto } from './sender.dto'
 
 export class MessageResponseDto {
@@ -29,6 +30,10 @@ export class MessageResponseDto {
   forwardedFrom?: MessageResponseDto
 
   @Expose()
+  @Type(() => MediaResponseDto)
+  media: MediaResponseDto[]
+
+  @Expose()
   statuses: Record<string, EnumMessageStatus> // Статусы для разных пользователей
 
   @Expose()
@@ -36,4 +41,7 @@ export class MessageResponseDto {
 
   @Expose()
   isEdited: boolean
+
+  @Expose()
+  viewsCount: number
 }

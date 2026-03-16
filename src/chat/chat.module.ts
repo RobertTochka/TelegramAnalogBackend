@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 
 import { MessageModule } from '@/message/message.module'
+import { MessageService } from '@/message/message.service'
 import { PrismaService } from '@/prisma.service'
 import { UserService } from '@/user/user.service'
 
@@ -18,7 +19,8 @@ import { ChatService } from './chat.service'
     PrismaService,
     ChatGateway,
     UserService,
-    ConfigService
+    ConfigService,
+    MessageService
   ]
 })
 export class ChatModule {}

@@ -1,5 +1,7 @@
 import {
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   Logger,
   NotFoundException
@@ -14,6 +16,7 @@ import { PaginatedResponse } from '@/chat/dto'
 import { PrismaService } from '@/prisma.service'
 
 import { CreateMessageDto, MessageFilterDto, MessageResponseDto } from './dto'
+import { MessagePositionResponseDto } from './dto/message-position-response.dto '
 
 @Injectable()
 export class MessageService {
@@ -21,6 +24,7 @@ export class MessageService {
 
   constructor(
     private readonly prismaService: PrismaService,
+    @Inject(forwardRef(() => ChatService))
     private readonly chatService: ChatService,
     private readonly eventEmitter: EventEmitter2
   ) {}
@@ -31,11 +35,22 @@ export class MessageService {
     userId: string,
     createMessageDto: CreateMessageDto
   ): Promise<MessageResponseDto> {
-    const { chatId, content, replyToId, forwardedFromId } = createMessageDto
+    const {
+      chatId,
+      content,
+      replyToId,
+      forwardedFromId,
+      isSystem = false
+    } = createMessageDto
 
     const isMember = await this.chatService.isChatMember(chatId, userId)
     if (!isMember) {
       throw new ForbiddenException('Вы не являетесь участником этого чата')
+    }
+    const isChannel = await this.chatService.isChannel(chatId)
+
+    if (isChannel) {
+      await this.chatService.checkAdminPermission(chatId, userId)
     }
 
     if (replyToId) {
@@ -53,7 +68,6 @@ export class MessageService {
       where: { chatId },
       select: { userId: true }
     })
-    const participantIds = chatMembers.map(m => m.userId)
 
     const message = await this.prismaService.$transaction(
       async prismaService => {
@@ -64,6 +78,7 @@ export class MessageService {
             content,
             replyToId,
             forwardedFromId,
+            isSystem,
             statuses: {
               create: chatMembers.map(member => ({
                 userId: member.userId,
@@ -339,7 +354,6 @@ export class MessageService {
       .findMany({
         where: {
           chatId,
-          isSystem: false,
           deletedAt: null,
           ...(fromDate && { createdAt: new Date(fromDate) }),
           ...(search && {
@@ -410,6 +424,84 @@ export class MessageService {
         nextCursor,
         hasNextPage: !!nextCursor
       }
+    }
+  }
+
+  async getMessagePosition(
+    userId: string,
+    chatId: string,
+    messageId: string,
+    limit: number = 40
+  ): Promise<MessagePositionResponseDto> {
+    const isMember = await this.chatService.isChatMember(chatId, userId)
+
+    if (!isMember) {
+      throw new ForbiddenException('Вы не являетесь участником этого чата')
+    }
+
+    const message = await this.prismaService.message.findFirst({
+      where: {
+        id: messageId,
+        chatId,
+        deletedAt: null
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true
+          }
+        },
+        media: true,
+        statuses: {
+          where: { userId },
+          select: {
+            userId: true,
+            status: true
+          }
+        }
+      }
+    })
+
+    if (!message) {
+      throw new NotFoundException('Сообщение не найдено')
+    }
+
+    const messagesBefore = await this.prismaService.message.count({
+      where: {
+        chatId,
+        deletedAt: null,
+        createdAt: { lt: message.createdAt }
+      }
+    })
+
+    const totalCount = await this.prismaService.message.count({
+      where: {
+        chatId,
+        deletedAt: null
+      }
+    })
+
+    const page = Math.floor(messagesBefore / limit)
+
+    const indexInPage = messagesBefore % limit
+
+    const messageWithRelations =
+      await this.connectReplyToOrForwardedFrom(message)
+
+    const messageDto = this.mapToResponseDto({
+      ...messageWithRelations,
+      statuses: message.statuses
+    })
+
+    return {
+      message: messageDto,
+      page,
+      indexInPage,
+      totalBefore: messagesBefore,
+      totalCount
     }
   }
 
@@ -539,9 +631,7 @@ export class MessageService {
     return messages.map(msg => this.mapToResponseDto(msg))
   }
 
-  //#region private methods
-
-  private async connectReplyToOrForwardedFrom(mainMessage) {
+  async connectReplyToOrForwardedFrom(mainMessage) {
     if (!mainMessage.replyToId && !mainMessage.forwardedFromId)
       return mainMessage
 
@@ -587,6 +677,23 @@ export class MessageService {
     return message
   }
 
+  async createSystemMessage(chatId: string, userId: string, content: string) {
+    const message = await this.create(userId, {
+      chatId,
+      content,
+      isSystem: true
+    })
+
+    this.eventEmitter.emit('message.system.created', {
+      chatId,
+      message
+    })
+
+    return message
+  }
+
+  //#region private methods
+
   private mapToResponseDto(message: any): MessageResponseDto {
     const statuses = message.statuses?.reduce(
       (acc, status) => {
@@ -596,12 +703,18 @@ export class MessageService {
       {} as Record<string, EnumMessageStatus>
     )
 
+    const viewsCount =
+      message.statuses?.filter(
+        (status: any) => status.status === EnumMessageStatus.READ
+      ).length || 0
+
     return plainToInstance(
       MessageResponseDto,
       {
         ...message,
         statuses,
-        isEdited: message.updatedAt > message.createdAt
+        isEdited: message.updatedAt > message.createdAt,
+        viewsCount
       },
       {
         excludeExtraneousValues: true

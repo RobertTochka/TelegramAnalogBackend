@@ -2,6 +2,8 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   Logger,
   NotFoundException
@@ -14,6 +16,7 @@ import { plainToInstance } from 'class-transformer'
 import { v4 as uuidv4 } from 'uuid'
 
 import { ms } from '@/libs/common/utils'
+import { MessageService } from '@/message/message.service'
 import { PrismaService } from '@/prisma.service'
 
 import {
@@ -31,7 +34,9 @@ export class ChatService {
   constructor(
     private prismaService: PrismaService,
     private configService: ConfigService,
-    private eventEmitter: EventEmitter2
+    private eventEmitter: EventEmitter2,
+    @Inject(forwardRef(() => MessageService))
+    private messageService: MessageService
   ) {}
 
   /**
@@ -446,6 +451,93 @@ export class ChatService {
       participantIds,
       deletedBy: userId
     })
+  }
+
+  async pinMessage(chatId: string, messageId: string, userId: string) {
+    const message = await this.prismaService.message.findFirst({
+      where: {
+        id: messageId,
+        chatId,
+        deletedAt: null
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true
+          }
+        }
+      }
+    })
+
+    if (!message) {
+      throw new NotFoundException('Сообщение не найдено')
+    }
+
+    const chat = await this.prismaService.chat.findUnique({
+      where: { id: chatId },
+      select: { pinnedMessageId: true }
+    })
+
+    await this.prismaService.$transaction(async prisma => {
+      if (chat.pinnedMessageId && chat.pinnedMessageId !== messageId) {
+        await prisma.message.update({
+          where: { id: chat.pinnedMessageId },
+          data: { pinnedByUserId: null }
+        })
+      }
+
+      await prisma.message.update({
+        where: { id: messageId },
+        data: { pinnedByUserId: userId }
+      })
+
+      await prisma.chat.update({
+        where: { id: chatId },
+        data: { pinnedMessageId: messageId }
+      })
+    })
+
+    await this.messageService.createSystemMessage(
+      chatId,
+      userId,
+      'Закрепил(а) сообщение'
+    )
+  }
+
+  async unpinMessage(chatId: string, messageId: string, userId: string) {
+    const chat = await this.prismaService.chat.findUnique({
+      where: { id: chatId },
+      select: { pinnedMessageId: true }
+    })
+
+    if (!chat.pinnedMessageId) {
+      throw new BadRequestException('В чате нет закрепленных сообщений')
+    }
+
+    if (chat.pinnedMessageId !== messageId) {
+      throw new BadRequestException('Это сообщение не является закрепленным')
+    }
+
+    await this.prismaService.$transaction(async prisma => {
+      await prisma.message.update({
+        where: { id: messageId },
+        data: { pinnedByUserId: null }
+      })
+
+      await prisma.chat.update({
+        where: { id: chatId },
+        data: { pinnedMessageId: null }
+      })
+    })
+
+    await this.messageService.createSystemMessage(
+      chatId,
+      userId,
+      'Открепил(а) сообщение'
+    )
   }
 
   /**
@@ -951,12 +1043,20 @@ export class ChatService {
 
     const existingLink = chat.inviteLink
 
-    if (existingLink && existingLink.expiresAt >= new Date(Date.now()))
+    if (existingLink && existingLink.expiresAt > new Date(Date.now()))
       return `${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/chats/join/${existingLink.link}`
 
     const newlink = this.generateInviteLink()
 
     const expirationDate = expiresAt || new Date(Date.now() + ms('2d'))
+
+    if (existingLink && existingLink.expiresAt <= new Date(Date.now())) {
+      await this.prismaService.inviteLink.delete({
+        where: {
+          chatId: chat.id
+        }
+      })
+    }
 
     const createdLink = await this.prismaService.inviteLink.create({
       data: {
@@ -1114,6 +1214,53 @@ export class ChatService {
     return counts
   }
 
+  async isChannel(chatId: string) {
+    const chat = await this.prismaService.chat.findUnique({
+      where: { id: chatId },
+      select: {
+        type: true
+      }
+    })
+
+    return chat.type === EnumChatType.CHANNEL
+  }
+
+  /**
+   * Проверка прав администратора
+   */
+  async checkAdminPermission(chatId: string, userId: string): Promise<void> {
+    const member = await this.prismaService.chatMember.findUnique({
+      where: {
+        chatId_userId: {
+          chatId,
+          userId
+        }
+      },
+      include: {
+        chat: {
+          include: {
+            admins: {
+              where: { userId }
+            }
+          }
+        }
+      }
+    })
+
+    if (!member) {
+      throw new ForbiddenException('Вы не являетесь участником чата')
+    }
+
+    if (
+      member.role === EnumMemberRole.OWNER ||
+      member.role === EnumMemberRole.ADMIN
+    ) {
+      return
+    }
+
+    throw new ForbiddenException('У вас нет прав на это действие')
+  }
+
   //#region private methods
 
   private async connectPinnedMessageToChat(chat) {
@@ -1157,48 +1304,27 @@ export class ChatService {
       }
     })
 
-    const newChat = { ...chat, lastMessage }
+    let newChat = { ...chat, lastMessage }
+
+    if (lastMessage.forwardedFromId) {
+      const forwardedFrom = await this.prismaService.message.findUnique({
+        where: {
+          id: lastMessage.forwardedFromId
+        }
+      })
+
+      newChat.lastMessage = { ...newChat.lastMessage, forwardedFrom }
+    } else if (lastMessage.replyToId) {
+      const replyTo = await this.prismaService.message.findUnique({
+        where: {
+          id: lastMessage.replyToId
+        }
+      })
+
+      newChat.lastMessage = { ...newChat.lastMessage, replyTo }
+    }
 
     return newChat
-  }
-
-  /**
-   * Проверка прав администратора
-   */
-  private async checkAdminPermission(
-    chatId: string,
-    userId: string
-  ): Promise<void> {
-    const member = await this.prismaService.chatMember.findUnique({
-      where: {
-        chatId_userId: {
-          chatId,
-          userId
-        }
-      },
-      include: {
-        chat: {
-          include: {
-            admins: {
-              where: { userId }
-            }
-          }
-        }
-      }
-    })
-
-    if (!member) {
-      throw new ForbiddenException('Вы не являетесь участником чата')
-    }
-
-    if (
-      member.role === EnumMemberRole.OWNER ||
-      member.role === EnumMemberRole.ADMIN
-    ) {
-      return
-    }
-
-    throw new ForbiddenException('У вас нет прав на это действие')
   }
 
   /**

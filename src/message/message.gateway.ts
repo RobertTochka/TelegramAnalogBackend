@@ -16,7 +16,7 @@ import { Server, Socket } from 'socket.io'
 import { ChatService } from '@/chat/chat.service'
 import { PrismaService } from '@/prisma.service'
 
-import { CreateMessageDto } from './dto'
+import { CreateMessageDto, MessageResponseDto } from './dto'
 import { MessageService } from './message.service'
 
 interface MessageEventMap {
@@ -302,5 +302,15 @@ export class MessageGateway
     } catch (error) {
       throw new WsException(error.message)
     }
+  }
+
+  @OnEvent('message.system.created')
+  handleSystemMessage(payload: {
+    chatId: string
+    message: MessageResponseDto
+  }) {
+    this.server.to(`chat:${payload.chatId}`).emit('message:new', {
+      message: payload.message
+    })
   }
 }

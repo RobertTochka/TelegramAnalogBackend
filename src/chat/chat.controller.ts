@@ -203,10 +203,10 @@ export class ChatController {
   @Authorization()
   @HttpCode(HttpStatus.OK)
   @Post(':id/pin')
-  async pin(
+  async pinChat(
     @Authorized('id') userId: string,
     @Param('id') id: string,
-    @Body() pin: boolean
+    @Body() { pin }: { pin: boolean }
   ) {
     return this.chatService.pin(id, pin, userId)
   }
@@ -236,5 +236,27 @@ export class ChatController {
     @Param('inviteLink') inviteLink: string
   ) {
     return this.chatService.joinByInviteLink(inviteLink, userId)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Post(':chatId/messages/:messageId/pin')
+  async pinMessage(
+    @Authorized('id') userId: string,
+    @Param('chatId') chatId: string,
+    @Param('messageId') messageId: string
+  ) {
+    return this.chatService.pinMessage(chatId, messageId, userId)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Delete(':chatId/messages/:messageId/pin')
+  async unpinMessage(
+    @Authorized('id') userId: string,
+    @Param('chatId') chatId: string,
+    @Param('messageId') messageId: string
+  ) {
+    return this.chatService.unpinMessage(chatId, messageId, userId)
   }
 }
