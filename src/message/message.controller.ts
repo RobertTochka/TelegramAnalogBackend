@@ -20,22 +20,6 @@ export class MessageController {
   }
 
   @Authorization()
-  @Get(':chatId/:messageId/position')
-  async getMessagePosition(
-    @Authorized('id') userId: string,
-    @Param('chatId') chatId: string,
-    @Param('messageId') messageId: string,
-    @Query('limit') limit?: string
-  ) {
-    return this.messageService.getMessagePosition(
-      userId,
-      chatId,
-      messageId,
-      limit ? parseInt(limit, 10) : 40
-    )
-  }
-
-  @Authorization()
   @Get('unread')
   async getUnreadCount(
     @Authorized('id') userId: string,

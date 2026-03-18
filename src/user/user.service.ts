@@ -10,7 +10,10 @@ import {
   EnumUserStatus
 } from '@prisma/__generated__/enums'
 import { hash, verify } from 'argon2'
+import * as fs from 'fs'
+import * as path from 'path'
 
+import { FileService } from '@/file/file.service'
 import { PrismaService } from '@/prisma.service'
 
 import {
@@ -26,7 +29,10 @@ import {
 export class UserService {
   private readonly logger = new Logger(UserService.name)
 
-  public constructor(private readonly prismaService: PrismaService) {}
+  public constructor(
+    private readonly prismaService: PrismaService,
+    private readonly fileService: FileService
+  ) {}
 
   async findAll(params: SearchUsersDto) {
     const { query, status, page = 1, limit = 20 } = params
@@ -286,6 +292,27 @@ export class UserService {
         id: user.id
       },
       data: data
+    })
+
+    return updatedUser
+  }
+
+  async updateAvatar(userId: string, avatarUrl: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId }
+    })
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден')
+    }
+
+    if (user.avatar && !user.avatar.includes('no-user-image.png')) {
+      await this.fileService.deleteFile(user.avatar)
+    }
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: userId },
+      data: { avatar: avatarUrl }
     })
 
     return updatedUser

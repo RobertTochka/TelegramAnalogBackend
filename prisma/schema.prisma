@@ -126,16 +126,14 @@ model ChatAdmin {
 }
 
 model Message {
-    id              String    @id @default(cuid())
-    content         String?
-    pinnedByUserId  String?   @map("pinned_by_user_id")
-    replyToId       String?   @map("reply_to_id") // Сообщение, на которое отвечаем
-    forwardedFromId String?   @map("forwarded_from_id") // Сообщение, которое пересылаем
-    isEdited        Boolean   @default(false) @map("is_edited")
-    isSystem        Boolean   @default(false) @map("is_system")
-    createdAt       DateTime  @default(now()) @map("created_at")
-    updatedAt       DateTime  @updatedAt @map("updated_at")
-    deletedAt       DateTime? @map("deleted_at")
+    id             String    @id @default(cuid())
+    content        String?
+    pinnedByUserId String?   @map("pinned_by_user_id")
+    isEdited       Boolean   @default(false) @map("is_edited")
+    isSystem       Boolean   @default(false) @map("is_system")
+    createdAt      DateTime  @default(now()) @map("created_at")
+    updatedAt      DateTime  @updatedAt @map("updated_at")
+    deletedAt      DateTime? @map("deleted_at")
 
     chat     Chat            @relation(fields: [chatId], references: [id], onDelete: Cascade)
     chatId   String          @map("chat_id")
@@ -144,9 +142,17 @@ model Message {
     media    Media[]
     statuses MessageStatus[]
 
+    replyTo         Message?  @relation("MessageReplies", fields: [replyToId], references: [id]) // Сообщение, на которое отвечаем
+    replyToId       String?   @map("reply_to_id")
+    replies         Message[] @relation("MessageReplies")
+    forwardedFrom   Message?  @relation("MessageForwards", fields: [forwardedFromId], references: [id]) // Сообщение, которое пересылаем
+    forwardedFromId String?   @map("forwarded_from_id")
+    forwards        Message[] @relation("MessageForwards")
+
     @@index([chatId, createdAt])
     @@index([senderId])
     @@index([replyToId])
+    @@index([forwardedFromId])
     @@map("messages")
 }
 

@@ -98,9 +98,22 @@ export class ChatController {
    */
   @Authorization()
   @HttpCode(HttpStatus.OK)
-  @Delete(':id')
+  @Delete(':id/history')
   async remove(@Authorized('id') userId: string, @Param('id') id: string) {
     await this.chatService.remove(id, userId)
+  }
+
+  /**
+   * Очистка истории
+   */
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Delete(':id')
+  async clearHistory(
+    @Authorized('id') userId: string,
+    @Param('id') id: string
+  ) {
+    await this.chatService.clearHistory(id, userId)
   }
 
   /**

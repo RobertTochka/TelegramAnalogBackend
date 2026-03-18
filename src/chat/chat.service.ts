@@ -11,7 +11,11 @@ import {
 import { ConfigService } from '@nestjs/config'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { Prisma } from '@prisma/__generated__/client'
-import { EnumChatType, EnumMemberRole } from '@prisma/__generated__/enums'
+import {
+  EnumChatType,
+  EnumMemberRole,
+  EnumMessageStatus
+} from '@prisma/__generated__/enums'
 import { plainToInstance } from 'class-transformer'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -451,6 +455,45 @@ export class ChatService {
       participantIds,
       deletedBy: userId
     })
+  }
+
+  async clearHistory(chatId: string, userId: string) {
+    const chat = await this.prismaService.chat.findUnique({
+      where: { id: chatId },
+      include: {
+        admins: true
+      }
+    })
+    const messages = await this.prismaService.message.findMany({
+      where: { chatId }
+    })
+
+    const messageIds = messages.map(m => m.id)
+
+    const isAdmin =
+      chat.admins.some(admin => admin.userId === userId) ||
+      chat.createdById === userId
+
+    if (messages.length === 0) return
+    if (chat.type === EnumChatType.CHANNEL && !isAdmin)
+      throw new BadRequestException('Вы не можете очистить историю канала')
+
+    if (chat.type === EnumChatType.CHANNEL) {
+      await this.prismaService.message.updateMany({
+        where: { id: { in: messageIds } },
+        data: { deletedAt: new Date() }
+      })
+    } else {
+      await this.prismaService.messageStatus.updateMany({
+        where: {
+          messageId: {
+            in: messageIds
+          },
+          userId: userId
+        },
+        data: { status: EnumMessageStatus.DELETED }
+      })
+    }
   }
 
   async pinMessage(chatId: string, messageId: string, userId: string) {

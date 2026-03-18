@@ -1,20 +1,34 @@
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory } from '@nestjs/core'
+import { NestExpressApplication } from '@nestjs/platform-express'
 import { RedisStore } from 'connect-redis'
 import * as cookieParser from 'cookie-parser'
 import * as session from 'express-session'
-import { createClient } from 'redis'
+import * as fs from 'fs'
+import * as path from 'path'
 
 import { AppModule } from './app.module'
+import { AVATARS_DIR, UPLOADS_DIR } from './constants/path.constants'
 import { SessionIoAdapter } from './libs/common/adapters'
 import { isDev, ms, parseBoolean, StringValue } from './libs/common/utils'
 import { REDIS_CLIENT } from './redis/RedisModule'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create<NestExpressApplication>(AppModule)
   const config = app.get(ConfigService)
   const redis = app.get(REDIS_CLIENT)
+
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true })
+  }
+  if (!fs.existsSync(AVATARS_DIR)) {
+    fs.mkdirSync(AVATARS_DIR, { recursive: true })
+  }
+
+  app.useStaticAssets(UPLOADS_DIR, {
+    prefix: '/uploads/'
+  })
 
   app.useWebSocketAdapter(new SessionIoAdapter(app, config, redis))
 

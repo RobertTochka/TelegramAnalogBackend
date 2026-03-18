@@ -67,4 +67,16 @@ export class ChatResponseDto {
 
   @Expose()
   isPinned: boolean
+
+  @Expose()
+  isSearchResult?: boolean
+
+  @Expose()
+  isSeparator?: boolean
+
+  @Expose()
+  isUser?: boolean
+
+  @Expose()
+  isChat?: boolean
 }

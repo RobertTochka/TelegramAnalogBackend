@@ -162,15 +162,15 @@ export const MessageScalarFieldEnum = {
   id: 'id',
   content: 'content',
   pinnedByUserId: 'pinnedByUserId',
-  replyToId: 'replyToId',
-  forwardedFromId: 'forwardedFromId',
   isEdited: 'isEdited',
   isSystem: 'isSystem',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt',
   chatId: 'chatId',
-  senderId: 'senderId'
+  senderId: 'senderId',
+  replyToId: 'replyToId',
+  forwardedFromId: 'forwardedFromId'
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]

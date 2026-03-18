@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -7,13 +8,16 @@ import {
   Param,
   Patch,
   Post,
-  Query
+  Query,
+  UploadedFile,
+  UseInterceptors
 } from '@nestjs/common'
 import { EnumFriendshipStatus, EnumUserRole } from '@prisma/__generated__/enums'
 
 import { Authorization, Authorized } from '@/auth/decorators'
 
 import { ChangePasswordDto, SearchUsersDto, UpdateUserDto } from './dto'
+import { UploadAvatar } from './interceptors'
 import { UserService } from './user.service'
 
 @Controller('users')
@@ -49,6 +53,22 @@ export class UserController {
     @Body() dto: UpdateUserDto
   ) {
     return this.userService.update(userId, dto)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Patch('avatar')
+  @UseInterceptors(UploadAvatar())
+  public async updateAvatar(
+    @Authorized('id') userId: string,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) {
+      throw new BadRequestException('Файл не загружен')
+    }
+
+    const avatarUrl = `/uploads/avatars/${file.filename}`
+    return this.userService.updateAvatar(userId, avatarUrl)
   }
 
   @Authorization()

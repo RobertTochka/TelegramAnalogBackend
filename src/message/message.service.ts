@@ -16,7 +16,6 @@ import { PaginatedResponse } from '@/chat/dto'
 import { PrismaService } from '@/prisma.service'
 
 import { CreateMessageDto, MessageFilterDto, MessageResponseDto } from './dto'
-import { MessagePositionResponseDto } from './dto/message-position-response.dto '
 
 @Injectable()
 export class MessageService {
@@ -43,19 +42,22 @@ export class MessageService {
       isSystem = false
     } = createMessageDto
 
+    // Проверка членства в чате
     const isMember = await this.chatService.isChatMember(chatId, userId)
     if (!isMember) {
       throw new ForbiddenException('Вы не являетесь участником этого чата')
     }
-    const isChannel = await this.chatService.isChannel(chatId)
 
+    // Проверка прав для канала
+    const isChannel = await this.chatService.isChannel(chatId)
     if (isChannel) {
       await this.chatService.checkAdminPermission(chatId, userId)
     }
 
+    // Проверка существования сообщения для ответа
     if (replyToId) {
       const replyMessage = await this.prismaService.message.findUnique({
-        where: { id: replyToId }
+        where: { id: replyToId, deletedAt: null }
       })
       if (!replyMessage) {
         throw new NotFoundException(
@@ -64,63 +66,76 @@ export class MessageService {
       }
     }
 
+    // Проверка существования сообщения для пересылки
+    if (forwardedFromId) {
+      const forwardedMessage = await this.prismaService.message.findUnique({
+        where: { id: forwardedFromId, deletedAt: null }
+      })
+      if (!forwardedMessage) {
+        throw new NotFoundException('Пересылаемое сообщение не найдено')
+      }
+    }
+
+    // Получаем всех участников чата для создания статусов
     const chatMembers = await this.prismaService.chatMember.findMany({
       where: { chatId },
       select: { userId: true }
     })
 
-    const message = await this.prismaService.$transaction(
-      async prismaService => {
-        const mainMessage = await prismaService.message.create({
-          data: {
-            chatId,
-            senderId: userId,
-            content,
-            replyToId,
-            forwardedFromId,
-            isSystem,
-            statuses: {
-              create: chatMembers.map(member => ({
-                userId: member.userId,
-                status: EnumMessageStatus.DELIVERED
-              }))
+    // Создаем сообщение в транзакции
+    const message = await this.prismaService.$transaction(async prisma => {
+      const mainMessage = await prisma.message.create({
+        data: {
+          chatId,
+          senderId: userId,
+          content,
+          replyToId,
+          forwardedFromId,
+          isSystem,
+          statuses: {
+            create: chatMembers.map(member => ({
+              userId: member.userId,
+              status: EnumMessageStatus.DELIVERED
+            }))
+          }
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              avatar: true
             }
           },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatar: true
-              }
-            },
-            media: true,
-            statuses: true
-          }
-        })
+          replyTo: true,
+          media: true,
+          statuses: true
+        }
+      })
 
-        const newMessage = await this.connectReplyToOrForwardedFrom(mainMessage)
+      // Получаем полную цепочку пересылаемых сообщений
+      const fullMessage = await this.loadForwardChain(mainMessage)
 
-        await prismaService.chat.update({
-          where: { id: chatId },
-          data: { lastMessageId: newMessage.id }
-        })
+      // Обновляем lastMessage в чате
+      await prisma.chat.update({
+        where: { id: chatId },
+        data: { lastMessageId: fullMessage.id }
+      })
 
-        return newMessage
-      }
-    )
+      return fullMessage
+    })
 
-    const messageDto = this.mapToResponseDto(message)
+    const msg = this.mapToResponseDto(message)
 
-    return messageDto
+    return msg
   }
 
   async findOne(
     messageId: string,
     userId: string
   ): Promise<MessageResponseDto> {
-    const mainMessage = await this.prismaService.message.findUnique({
+    const message = await this.prismaService.message.findUnique({
       where: {
         id: messageId,
         deletedAt: null
@@ -134,6 +149,7 @@ export class MessageService {
             avatar: true
           }
         },
+        replyTo: true,
         media: true,
         statuses: {
           where: { userId },
@@ -142,18 +158,20 @@ export class MessageService {
       }
     })
 
-    if (!mainMessage) {
+    if (!message) {
       throw new NotFoundException('Сообщение не найдено')
     }
 
-    const message = await this.connectReplyToOrForwardedFrom(mainMessage)
-
+    // Проверка доступа к чату
     const isMember = await this.chatService.isChatMember(message.chatId, userId)
     if (!isMember) {
       throw new ForbiddenException('У вас нет доступа к этому сообщению')
     }
 
-    return this.mapToResponseDto(message)
+    // Загружаем цепочку пересланных сообщений
+    const fullMessage = await this.loadForwardChain(message)
+
+    return this.mapToResponseDto(fullMessage)
   }
 
   async update(
@@ -350,22 +368,22 @@ export class MessageService {
 
     const { limit = 50, fromDate, search, cursor } = filter
 
+    const where: Prisma.MessageWhereInput = {
+      chatId,
+      deletedAt: null,
+      ...(fromDate && { createdAt: { gte: new Date(fromDate) } }),
+      ...(search && {
+        content: { contains: search, mode: 'insensitive' }
+      })
+    }
+
     const messagesPromise = this.prismaService.message
       .findMany({
-        where: {
-          chatId,
-          deletedAt: null,
-          ...(fromDate && { createdAt: new Date(fromDate) }),
-          ...(search && {
-            content: { contains: search, mode: 'insensitive' }
-          })
-        },
+        where,
         take: limit,
         ...(cursor && {
           skip: 1,
-          cursor: {
-            id: cursor
-          }
+          cursor: { id: cursor }
         }),
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         include: {
@@ -377,6 +395,7 @@ export class MessageService {
               avatar: true
             }
           },
+          replyTo: true,
           media: true,
           statuses: {
             where: { userId },
@@ -388,24 +407,14 @@ export class MessageService {
         }
       })
       .then(messages =>
-        Promise.all(
-          messages.map(msg => this.connectReplyToOrForwardedFrom(msg))
-        )
+        Promise.all(messages.map(msg => this.loadForwardChain(msg)))
       )
 
-    const countPromise = this.prismaService.message.count({
-      where: {
-        chatId,
-        deletedAt: null,
-        ...(fromDate && { createdAt: new Date(fromDate) }),
-        ...(search && {
-          content: { contains: search, mode: 'insensitive' }
-        })
-      }
-    })
+    const countPromise = this.prismaService.message.count({ where })
 
     const [messages, total] = await Promise.all([messagesPromise, countPromise])
 
+    // Помечаем сообщения как доставленные
     await this.markMessagesAsDelivered(
       userId,
       messages.map(m => m.id)
@@ -424,84 +433,6 @@ export class MessageService {
         nextCursor,
         hasNextPage: !!nextCursor
       }
-    }
-  }
-
-  async getMessagePosition(
-    userId: string,
-    chatId: string,
-    messageId: string,
-    limit: number = 40
-  ): Promise<MessagePositionResponseDto> {
-    const isMember = await this.chatService.isChatMember(chatId, userId)
-
-    if (!isMember) {
-      throw new ForbiddenException('Вы не являетесь участником этого чата')
-    }
-
-    const message = await this.prismaService.message.findFirst({
-      where: {
-        id: messageId,
-        chatId,
-        deletedAt: null
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            avatar: true
-          }
-        },
-        media: true,
-        statuses: {
-          where: { userId },
-          select: {
-            userId: true,
-            status: true
-          }
-        }
-      }
-    })
-
-    if (!message) {
-      throw new NotFoundException('Сообщение не найдено')
-    }
-
-    const messagesBefore = await this.prismaService.message.count({
-      where: {
-        chatId,
-        deletedAt: null,
-        createdAt: { lt: message.createdAt }
-      }
-    })
-
-    const totalCount = await this.prismaService.message.count({
-      where: {
-        chatId,
-        deletedAt: null
-      }
-    })
-
-    const page = Math.floor(messagesBefore / limit)
-
-    const indexInPage = messagesBefore % limit
-
-    const messageWithRelations =
-      await this.connectReplyToOrForwardedFrom(message)
-
-    const messageDto = this.mapToResponseDto({
-      ...messageWithRelations,
-      statuses: message.statuses
-    })
-
-    return {
-      message: messageDto,
-      page,
-      indexInPage,
-      totalBefore: messagesBefore,
-      totalCount
     }
   }
 
@@ -631,52 +562,6 @@ export class MessageService {
     return messages.map(msg => this.mapToResponseDto(msg))
   }
 
-  async connectReplyToOrForwardedFrom(mainMessage) {
-    if (!mainMessage.replyToId && !mainMessage.forwardedFromId)
-      return mainMessage
-
-    const replyTo = mainMessage.replyToId
-      ? await this.prismaService.message.findUnique({
-          where: { id: mainMessage.replyToId },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatar: true
-              }
-            }
-          }
-        })
-      : undefined
-
-    const forwardedFrom = mainMessage.forwardedFromId
-      ? await this.prismaService.message.findUnique({
-          where: { id: mainMessage.forwardedFromId },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                avatar: true
-              }
-            }
-          }
-        })
-      : undefined
-
-    if (replyTo && forwardedFrom)
-      throw new ForbiddenException(
-        'Сообщение не может быть пересланным и ответом одновременно'
-      )
-
-    const message = { ...mainMessage, replyTo, forwardedFrom }
-
-    return message
-  }
-
   async createSystemMessage(chatId: string, userId: string, content: string) {
     const message = await this.create(userId, {
       chatId,
@@ -693,6 +578,47 @@ export class MessageService {
   }
 
   //#region private methods
+
+  private async loadForwardChain(
+    message: any,
+    depth: number = 0
+  ): Promise<any> {
+    const MAX_DEPTH = 10
+
+    if (!message.forwardedFromId || depth >= MAX_DEPTH) {
+      return message
+    }
+
+    const forwardedMessage = await this.prismaService.message.findUnique({
+      where: { id: message.forwardedFromId, deletedAt: null },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            avatar: true
+          }
+        },
+        media: true
+      }
+    })
+
+    if (!forwardedMessage) {
+      return message
+    }
+
+    // Рекурсивно загружаем следующее сообщение в цепочке
+    const forwardedWithChain = await this.loadForwardChain(
+      forwardedMessage,
+      depth + 1
+    )
+
+    return {
+      ...message,
+      forwardedFrom: forwardedWithChain
+    }
+  }
 
   private mapToResponseDto(message: any): MessageResponseDto {
     const statuses = message.statuses?.reduce(
@@ -711,8 +637,17 @@ export class MessageService {
     return plainToInstance(
       MessageResponseDto,
       {
-        ...message,
+        id: message.id,
+        chatId: message.chatId,
+        sender: message.sender,
+        content: message.content,
+        isSystem: message.isSystem,
+        replyTo: message.replyTo,
+        forwardedFrom: message.forwardedFrom,
+        media: message.media || [],
         statuses,
+        createdAt: message.createdAt,
+        updatedAt: message.updatedAt,
         isEdited: message.updatedAt > message.createdAt,
         viewsCount
       },
