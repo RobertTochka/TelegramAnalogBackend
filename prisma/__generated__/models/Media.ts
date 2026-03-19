@@ -41,6 +41,7 @@ export type MediaMinAggregateOutputType = {
   url: string | null
   fileName: string | null
   fileSize: number | null
+  safeName: string | null
   messageId: string | null
 }
 
@@ -51,6 +52,7 @@ export type MediaMaxAggregateOutputType = {
   url: string | null
   fileName: string | null
   fileSize: number | null
+  safeName: string | null
   messageId: string | null
 }
 
@@ -61,6 +63,7 @@ export type MediaCountAggregateOutputType = {
   url: number
   fileName: number
   fileSize: number
+  safeName: number
   messageId: number
   _all: number
 }
@@ -81,6 +84,7 @@ export type MediaMinAggregateInputType = {
   url?: true
   fileName?: true
   fileSize?: true
+  safeName?: true
   messageId?: true
 }
 
@@ -91,6 +95,7 @@ export type MediaMaxAggregateInputType = {
   url?: true
   fileName?: true
   fileSize?: true
+  safeName?: true
   messageId?: true
 }
 
@@ -101,6 +106,7 @@ export type MediaCountAggregateInputType = {
   url?: true
   fileName?: true
   fileSize?: true
+  safeName?: true
   messageId?: true
   _all?: true
 }
@@ -198,6 +204,7 @@ export type MediaGroupByOutputType = {
   url: string
   fileName: string | null
   fileSize: number | null
+  safeName: string
   messageId: string
   _count: MediaCountAggregateOutputType | null
   _avg: MediaAvgAggregateOutputType | null
@@ -231,6 +238,7 @@ export type MediaWhereInput = {
   url?: Prisma.StringFilter<"Media"> | string
   fileName?: Prisma.StringNullableFilter<"Media"> | string | null
   fileSize?: Prisma.IntNullableFilter<"Media"> | number | null
+  safeName?: Prisma.StringFilter<"Media"> | string
   messageId?: Prisma.StringFilter<"Media"> | string
   message?: Prisma.XOR<Prisma.MessageScalarRelationFilter, Prisma.MessageWhereInput>
 }
@@ -242,6 +250,7 @@ export type MediaOrderByWithRelationInput = {
   url?: Prisma.SortOrder
   fileName?: Prisma.SortOrderInput | Prisma.SortOrder
   fileSize?: Prisma.SortOrderInput | Prisma.SortOrder
+  safeName?: Prisma.SortOrder
   messageId?: Prisma.SortOrder
   message?: Prisma.MessageOrderByWithRelationInput
 }
@@ -256,6 +265,7 @@ export type MediaWhereUniqueInput = Prisma.AtLeast<{
   url?: Prisma.StringFilter<"Media"> | string
   fileName?: Prisma.StringNullableFilter<"Media"> | string | null
   fileSize?: Prisma.IntNullableFilter<"Media"> | number | null
+  safeName?: Prisma.StringFilter<"Media"> | string
   messageId?: Prisma.StringFilter<"Media"> | string
   message?: Prisma.XOR<Prisma.MessageScalarRelationFilter, Prisma.MessageWhereInput>
 }, "id">
@@ -267,6 +277,7 @@ export type MediaOrderByWithAggregationInput = {
   url?: Prisma.SortOrder
   fileName?: Prisma.SortOrderInput | Prisma.SortOrder
   fileSize?: Prisma.SortOrderInput | Prisma.SortOrder
+  safeName?: Prisma.SortOrder
   messageId?: Prisma.SortOrder
   _count?: Prisma.MediaCountOrderByAggregateInput
   _avg?: Prisma.MediaAvgOrderByAggregateInput
@@ -285,6 +296,7 @@ export type MediaScalarWhereWithAggregatesInput = {
   url?: Prisma.StringWithAggregatesFilter<"Media"> | string
   fileName?: Prisma.StringNullableWithAggregatesFilter<"Media"> | string | null
   fileSize?: Prisma.IntNullableWithAggregatesFilter<"Media"> | number | null
+  safeName?: Prisma.StringWithAggregatesFilter<"Media"> | string
   messageId?: Prisma.StringWithAggregatesFilter<"Media"> | string
 }
 
@@ -295,6 +307,7 @@ export type MediaCreateInput = {
   url: string
   fileName?: string | null
   fileSize?: number | null
+  safeName: string
   message: Prisma.MessageCreateNestedOneWithoutMediaInput
 }
 
@@ -305,6 +318,7 @@ export type MediaUncheckedCreateInput = {
   url: string
   fileName?: string | null
   fileSize?: number | null
+  safeName: string
   messageId: string
 }
 
@@ -315,6 +329,7 @@ export type MediaUpdateInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  safeName?: Prisma.StringFieldUpdateOperationsInput | string
   message?: Prisma.MessageUpdateOneRequiredWithoutMediaNestedInput
 }
 
@@ -325,6 +340,7 @@ export type MediaUncheckedUpdateInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  safeName?: Prisma.StringFieldUpdateOperationsInput | string
   messageId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -335,6 +351,7 @@ export type MediaCreateManyInput = {
   url: string
   fileName?: string | null
   fileSize?: number | null
+  safeName: string
   messageId: string
 }
 
@@ -345,6 +362,7 @@ export type MediaUpdateManyMutationInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  safeName?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type MediaUncheckedUpdateManyInput = {
@@ -354,6 +372,7 @@ export type MediaUncheckedUpdateManyInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  safeName?: Prisma.StringFieldUpdateOperationsInput | string
   messageId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -374,6 +393,7 @@ export type MediaCountOrderByAggregateInput = {
   url?: Prisma.SortOrder
   fileName?: Prisma.SortOrder
   fileSize?: Prisma.SortOrder
+  safeName?: Prisma.SortOrder
   messageId?: Prisma.SortOrder
 }
 
@@ -388,6 +408,7 @@ export type MediaMaxOrderByAggregateInput = {
   url?: Prisma.SortOrder
   fileName?: Prisma.SortOrder
   fileSize?: Prisma.SortOrder
+  safeName?: Prisma.SortOrder
   messageId?: Prisma.SortOrder
 }
 
@@ -398,6 +419,7 @@ export type MediaMinOrderByAggregateInput = {
   url?: Prisma.SortOrder
   fileName?: Prisma.SortOrder
   fileSize?: Prisma.SortOrder
+  safeName?: Prisma.SortOrder
   messageId?: Prisma.SortOrder
 }
 
@@ -466,6 +488,7 @@ export type MediaCreateWithoutMessageInput = {
   url: string
   fileName?: string | null
   fileSize?: number | null
+  safeName: string
 }
 
 export type MediaUncheckedCreateWithoutMessageInput = {
@@ -475,6 +498,7 @@ export type MediaUncheckedCreateWithoutMessageInput = {
   url: string
   fileName?: string | null
   fileSize?: number | null
+  safeName: string
 }
 
 export type MediaCreateOrConnectWithoutMessageInput = {
@@ -513,6 +537,7 @@ export type MediaScalarWhereInput = {
   url?: Prisma.StringFilter<"Media"> | string
   fileName?: Prisma.StringNullableFilter<"Media"> | string | null
   fileSize?: Prisma.IntNullableFilter<"Media"> | number | null
+  safeName?: Prisma.StringFilter<"Media"> | string
   messageId?: Prisma.StringFilter<"Media"> | string
 }
 
@@ -523,6 +548,7 @@ export type MediaCreateManyMessageInput = {
   url: string
   fileName?: string | null
   fileSize?: number | null
+  safeName: string
 }
 
 export type MediaUpdateWithoutMessageInput = {
@@ -532,6 +558,7 @@ export type MediaUpdateWithoutMessageInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  safeName?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type MediaUncheckedUpdateWithoutMessageInput = {
@@ -541,6 +568,7 @@ export type MediaUncheckedUpdateWithoutMessageInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  safeName?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type MediaUncheckedUpdateManyWithoutMessageInput = {
@@ -550,6 +578,7 @@ export type MediaUncheckedUpdateManyWithoutMessageInput = {
   url?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fileSize?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  safeName?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -561,6 +590,7 @@ export type MediaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   url?: boolean
   fileName?: boolean
   fileSize?: boolean
+  safeName?: boolean
   messageId?: boolean
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["media"]>
@@ -572,6 +602,7 @@ export type MediaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   url?: boolean
   fileName?: boolean
   fileSize?: boolean
+  safeName?: boolean
   messageId?: boolean
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["media"]>
@@ -583,6 +614,7 @@ export type MediaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   url?: boolean
   fileName?: boolean
   fileSize?: boolean
+  safeName?: boolean
   messageId?: boolean
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["media"]>
@@ -594,10 +626,11 @@ export type MediaSelectScalar = {
   url?: boolean
   fileName?: boolean
   fileSize?: boolean
+  safeName?: boolean
   messageId?: boolean
 }
 
-export type MediaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "type" | "url" | "fileName" | "fileSize" | "messageId", ExtArgs["result"]["media"]>
+export type MediaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "createdAt" | "type" | "url" | "fileName" | "fileSize" | "safeName" | "messageId", ExtArgs["result"]["media"]>
 export type MediaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   message?: boolean | Prisma.MessageDefaultArgs<ExtArgs>
 }
@@ -620,6 +653,7 @@ export type $MediaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     url: string
     fileName: string | null
     fileSize: number | null
+    safeName: string
     messageId: string
   }, ExtArgs["result"]["media"]>
   composites: {}
@@ -1051,6 +1085,7 @@ export interface MediaFieldRefs {
   readonly url: Prisma.FieldRef<"Media", 'String'>
   readonly fileName: Prisma.FieldRef<"Media", 'String'>
   readonly fileSize: Prisma.FieldRef<"Media", 'Int'>
+  readonly safeName: Prisma.FieldRef<"Media", 'String'>
   readonly messageId: Prisma.FieldRef<"Media", 'String'>
 }
     

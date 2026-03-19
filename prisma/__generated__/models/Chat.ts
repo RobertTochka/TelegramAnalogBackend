@@ -197,7 +197,7 @@ export type ChatGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 
 export type ChatGroupByOutputType = {
   id: string
-  name: string
+  name: string | null
   description: string | null
   avatar: string | null
   pinnedMessageId: string | null
@@ -234,7 +234,7 @@ export type ChatWhereInput = {
   OR?: Prisma.ChatWhereInput[]
   NOT?: Prisma.ChatWhereInput | Prisma.ChatWhereInput[]
   id?: Prisma.StringFilter<"Chat"> | string
-  name?: Prisma.StringFilter<"Chat"> | string
+  name?: Prisma.StringNullableFilter<"Chat"> | string | null
   description?: Prisma.StringNullableFilter<"Chat"> | string | null
   avatar?: Prisma.StringNullableFilter<"Chat"> | string | null
   pinnedMessageId?: Prisma.StringNullableFilter<"Chat"> | string | null
@@ -258,7 +258,7 @@ export type ChatWhereInput = {
 
 export type ChatOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
   pinnedMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -287,7 +287,7 @@ export type ChatWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ChatWhereInput | Prisma.ChatWhereInput[]
   OR?: Prisma.ChatWhereInput[]
   NOT?: Prisma.ChatWhereInput | Prisma.ChatWhereInput[]
-  name?: Prisma.StringFilter<"Chat"> | string
+  name?: Prisma.StringNullableFilter<"Chat"> | string | null
   description?: Prisma.StringNullableFilter<"Chat"> | string | null
   avatar?: Prisma.StringNullableFilter<"Chat"> | string | null
   pinnedMessageId?: Prisma.StringNullableFilter<"Chat"> | string | null
@@ -310,7 +310,7 @@ export type ChatWhereUniqueInput = Prisma.AtLeast<{
 
 export type ChatOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  name?: Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
   pinnedMessageId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -332,7 +332,7 @@ export type ChatScalarWhereWithAggregatesInput = {
   OR?: Prisma.ChatScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ChatScalarWhereWithAggregatesInput | Prisma.ChatScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Chat"> | string
-  name?: Prisma.StringWithAggregatesFilter<"Chat"> | string
+  name?: Prisma.StringNullableWithAggregatesFilter<"Chat"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Chat"> | string | null
   avatar?: Prisma.StringNullableWithAggregatesFilter<"Chat"> | string | null
   pinnedMessageId?: Prisma.StringNullableWithAggregatesFilter<"Chat"> | string | null
@@ -348,7 +348,7 @@ export type ChatScalarWhereWithAggregatesInput = {
 
 export type ChatCreateInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -371,7 +371,7 @@ export type ChatCreateInput = {
 
 export type ChatUncheckedCreateInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -394,7 +394,7 @@ export type ChatUncheckedCreateInput = {
 
 export type ChatUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -417,7 +417,7 @@ export type ChatUpdateInput = {
 
 export type ChatUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -440,7 +440,7 @@ export type ChatUncheckedUpdateInput = {
 
 export type ChatCreateManyInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -456,7 +456,7 @@ export type ChatCreateManyInput = {
 
 export type ChatUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -471,7 +471,7 @@ export type ChatUpdateManyMutationInput = {
 
 export type ChatUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -706,7 +706,7 @@ export type ChatUpdateOneWithoutInviteLinkNestedInput = {
 
 export type ChatCreateWithoutCreatedByInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -728,7 +728,7 @@ export type ChatCreateWithoutCreatedByInput = {
 
 export type ChatUncheckedCreateWithoutCreatedByInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -779,7 +779,7 @@ export type ChatScalarWhereInput = {
   OR?: Prisma.ChatScalarWhereInput[]
   NOT?: Prisma.ChatScalarWhereInput | Prisma.ChatScalarWhereInput[]
   id?: Prisma.StringFilter<"Chat"> | string
-  name?: Prisma.StringFilter<"Chat"> | string
+  name?: Prisma.StringNullableFilter<"Chat"> | string | null
   description?: Prisma.StringNullableFilter<"Chat"> | string | null
   avatar?: Prisma.StringNullableFilter<"Chat"> | string | null
   pinnedMessageId?: Prisma.StringNullableFilter<"Chat"> | string | null
@@ -795,7 +795,7 @@ export type ChatScalarWhereInput = {
 
 export type ChatCreateWithoutMembersInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -817,7 +817,7 @@ export type ChatCreateWithoutMembersInput = {
 
 export type ChatUncheckedCreateWithoutMembersInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -855,7 +855,7 @@ export type ChatUpdateToOneWithWhereWithoutMembersInput = {
 
 export type ChatUpdateWithoutMembersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -877,7 +877,7 @@ export type ChatUpdateWithoutMembersInput = {
 
 export type ChatUncheckedUpdateWithoutMembersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -899,7 +899,7 @@ export type ChatUncheckedUpdateWithoutMembersInput = {
 
 export type ChatCreateWithoutAdminsInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -921,7 +921,7 @@ export type ChatCreateWithoutAdminsInput = {
 
 export type ChatUncheckedCreateWithoutAdminsInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -959,7 +959,7 @@ export type ChatUpdateToOneWithWhereWithoutAdminsInput = {
 
 export type ChatUpdateWithoutAdminsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -981,7 +981,7 @@ export type ChatUpdateWithoutAdminsInput = {
 
 export type ChatUncheckedUpdateWithoutAdminsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1003,7 +1003,7 @@ export type ChatUncheckedUpdateWithoutAdminsInput = {
 
 export type ChatCreateWithoutMessagesInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1025,7 +1025,7 @@ export type ChatCreateWithoutMessagesInput = {
 
 export type ChatUncheckedCreateWithoutMessagesInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1063,7 +1063,7 @@ export type ChatUpdateToOneWithWhereWithoutMessagesInput = {
 
 export type ChatUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1085,7 +1085,7 @@ export type ChatUpdateWithoutMessagesInput = {
 
 export type ChatUncheckedUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1107,7 +1107,7 @@ export type ChatUncheckedUpdateWithoutMessagesInput = {
 
 export type ChatCreateWithoutArchivedByInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1129,7 +1129,7 @@ export type ChatCreateWithoutArchivedByInput = {
 
 export type ChatUncheckedCreateWithoutArchivedByInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1167,7 +1167,7 @@ export type ChatUpdateToOneWithWhereWithoutArchivedByInput = {
 
 export type ChatUpdateWithoutArchivedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1189,7 +1189,7 @@ export type ChatUpdateWithoutArchivedByInput = {
 
 export type ChatUncheckedUpdateWithoutArchivedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1211,7 +1211,7 @@ export type ChatUncheckedUpdateWithoutArchivedByInput = {
 
 export type ChatCreateWithoutPinnedChatsInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1233,7 +1233,7 @@ export type ChatCreateWithoutPinnedChatsInput = {
 
 export type ChatUncheckedCreateWithoutPinnedChatsInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1271,7 +1271,7 @@ export type ChatUpdateToOneWithWhereWithoutPinnedChatsInput = {
 
 export type ChatUpdateWithoutPinnedChatsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1293,7 +1293,7 @@ export type ChatUpdateWithoutPinnedChatsInput = {
 
 export type ChatUncheckedUpdateWithoutPinnedChatsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1315,7 +1315,7 @@ export type ChatUncheckedUpdateWithoutPinnedChatsInput = {
 
 export type ChatCreateWithoutMutedByInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1337,7 +1337,7 @@ export type ChatCreateWithoutMutedByInput = {
 
 export type ChatUncheckedCreateWithoutMutedByInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1375,7 +1375,7 @@ export type ChatUpdateToOneWithWhereWithoutMutedByInput = {
 
 export type ChatUpdateWithoutMutedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1397,7 +1397,7 @@ export type ChatUpdateWithoutMutedByInput = {
 
 export type ChatUncheckedUpdateWithoutMutedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1419,7 +1419,7 @@ export type ChatUncheckedUpdateWithoutMutedByInput = {
 
 export type ChatCreateWithoutInviteLinkInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1441,7 +1441,7 @@ export type ChatCreateWithoutInviteLinkInput = {
 
 export type ChatUncheckedCreateWithoutInviteLinkInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1479,7 +1479,7 @@ export type ChatUpdateToOneWithWhereWithoutInviteLinkInput = {
 
 export type ChatUpdateWithoutInviteLinkInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1501,7 +1501,7 @@ export type ChatUpdateWithoutInviteLinkInput = {
 
 export type ChatUncheckedUpdateWithoutInviteLinkInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1523,7 +1523,7 @@ export type ChatUncheckedUpdateWithoutInviteLinkInput = {
 
 export type ChatCreateManyCreatedByInput = {
   id?: string
-  name: string
+  name?: string | null
   description?: string | null
   avatar?: string | null
   pinnedMessageId?: string | null
@@ -1538,7 +1538,7 @@ export type ChatCreateManyCreatedByInput = {
 
 export type ChatUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1560,7 +1560,7 @@ export type ChatUpdateWithoutCreatedByInput = {
 
 export type ChatUncheckedUpdateWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1582,7 +1582,7 @@ export type ChatUncheckedUpdateWithoutCreatedByInput = {
 
 export type ChatUncheckedUpdateManyWithoutCreatedByInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pinnedMessageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1779,7 +1779,7 @@ export type $ChatPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    name: string
+    name: string | null
     description: string | null
     avatar: string | null
     pinnedMessageId: string | null

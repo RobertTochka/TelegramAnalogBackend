@@ -194,6 +194,7 @@ export const MediaScalarFieldEnum = {
   url: 'url',
   fileName: 'fileName',
   fileSize: 'fileSize',
+  safeName: 'safeName',
   messageId: 'messageId'
 } as const
 

@@ -1,3 +1,4 @@
+import { EnumMediaType } from '@prisma/__generated__/enums'
 import { IsBoolean, IsOptional, IsString } from 'class-validator'
 
 export class CreateMessageDto {
@@ -19,4 +20,13 @@ export class CreateMessageDto {
   @IsBoolean()
   @IsOptional()
   isSystem?: boolean
+
+  @IsOptional()
+  media?: {
+    url: string
+    type: EnumMediaType
+    fileName: string
+    fileSize: number
+    safeName: string
+  }[]
 }

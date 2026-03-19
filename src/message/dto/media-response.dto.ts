@@ -19,14 +19,7 @@ export class MediaResponseDto {
 
   @Expose()
   createdAt: Date
-}
 
-export class MediaUploadDto {
-  type: EnumMediaType
-  file: Express.Multer.File
-}
-
-export class MediaMessageDto {
-  caption?: string
-  mediaIds: string[]
+  @Expose()
+  safeName: string
 }

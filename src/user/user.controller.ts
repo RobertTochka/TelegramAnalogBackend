@@ -16,7 +16,12 @@ import { EnumFriendshipStatus, EnumUserRole } from '@prisma/__generated__/enums'
 
 import { Authorization, Authorized } from '@/auth/decorators'
 
-import { ChangePasswordDto, SearchUsersDto, UpdateUserDto } from './dto'
+import {
+  ChangePasswordDto,
+  SearchUsersDto,
+  UpdateUserDto,
+  UserSearchFilterDto
+} from './dto'
 import { UploadAvatar } from './interceptors'
 import { UserService } from './user.service'
 
@@ -29,6 +34,16 @@ export class UserController {
   @Get()
   async findAll(@Query() searchParams: SearchUsersDto) {
     return this.userService.findAll(searchParams)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
+  @Get('search')
+  async searchUsers(
+    @Authorized('id') userId: string,
+    @Query() filter: UserSearchFilterDto
+  ) {
+    return this.userService.searchUsers(userId, filter)
   }
 
   @Authorization()

@@ -39,6 +39,7 @@ export class MessageService {
       content,
       replyToId,
       forwardedFromId,
+      media,
       isSystem = false
     } = createMessageDto
 
@@ -92,6 +93,17 @@ export class MessageService {
           replyToId,
           forwardedFromId,
           isSystem,
+          media: media?.length
+            ? {
+                create: media.map(file => ({
+                  type: file.type,
+                  url: file.url,
+                  fileName: file.fileName,
+                  fileSize: file.fileSize,
+                  safeName: file.safeName
+                }))
+              }
+            : undefined,
           statuses: {
             create: chatMembers.map(member => ({
               userId: member.userId,
@@ -361,11 +373,6 @@ export class MessageService {
     chatId: string,
     filter: MessageFilterDto
   ): Promise<PaginatedResponse<MessageResponseDto[]>> {
-    const isMember = await this.chatService.isChatMember(chatId, userId)
-    if (!isMember) {
-      throw new ForbiddenException('Вы не являетесь участником этого чата')
-    }
-
     const { limit = 50, fromDate, search, cursor } = filter
 
     const where: Prisma.MessageWhereInput = {

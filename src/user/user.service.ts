@@ -5,6 +5,7 @@ import {
   Logger,
   NotFoundException
 } from '@nestjs/common'
+import { Prisma } from '@prisma/__generated__/client'
 import {
   EnumFriendshipStatus,
   EnumUserStatus
@@ -13,6 +14,7 @@ import { hash, verify } from 'argon2'
 import * as fs from 'fs'
 import * as path from 'path'
 
+import { PaginatedResponse } from '@/chat/dto'
 import { FileService } from '@/file/file.service'
 import { PrismaService } from '@/prisma.service'
 
@@ -22,7 +24,9 @@ import {
   FriendRequestsResponseDto,
   GetFriendsResponseDto,
   SearchUsersDto,
-  UpdateUserDto
+  UpdateUserDto,
+  UserDto,
+  UserSearchFilterDto
 } from './dto'
 
 @Injectable()
@@ -79,6 +83,72 @@ export class UserService {
     return {
       users,
       total
+    }
+  }
+
+  async searchUsers(
+    userId: string,
+    filter: UserSearchFilterDto
+  ): Promise<PaginatedResponse<UserDto[]>> {
+    const { search, cursor } = filter
+    const limit = Number(filter.limit) || 20
+
+    const q = search?.trim()
+    if (!q) {
+      return {
+        data: [],
+        meta: {
+          total: 0,
+          limit,
+          nextCursor: null,
+          hasNextPage: false
+        }
+      }
+    }
+
+    const where: Prisma.UserWhereInput = {
+      deletedAt: null,
+      id: { not: userId },
+      OR: [
+        { username: { contains: q, mode: 'insensitive' } },
+        { firstName: { contains: q, mode: 'insensitive' } },
+        { lastName: { contains: q, mode: 'insensitive' } }
+      ]
+    }
+
+    const total = await this.prismaService.user.count({ where })
+
+    const users = await this.prismaService.user.findMany({
+      where,
+      take: limit,
+      ...(cursor && {
+        skip: 1,
+        cursor: { id: cursor }
+      }),
+      orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+      select: {
+        id: true,
+        username: true,
+        firstName: true,
+        lastName: true,
+        description: true,
+        avatar: true,
+        status: true,
+        lastSeen: true
+      }
+    })
+
+    const nextCursor =
+      users.length === limit ? users[users.length - 1].id : null
+
+    return {
+      data: users,
+      meta: {
+        total,
+        limit,
+        nextCursor,
+        hasNextPage: !!nextCursor
+      }
     }
   }
 

@@ -63,7 +63,7 @@ model Friendship {
 
 model Chat {
     id              String       @id @default(cuid())
-    name            String
+    name            String?
     description     String?
     avatar          String?      @default("/uploads/no-chat-image.png")
     pinnedMessageId String?      @map("pinned_message_id")
@@ -179,6 +179,7 @@ model Media {
     url      String
     fileName String?       @map("file_name")
     fileSize Int?          @map("file_size")
+    safeName String        @map("safe_name")
 
     message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
     messageId String  @map("message_id")

@@ -1,6 +1,9 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
+import { EnumMediaType } from '@prisma/__generated__/enums'
+import { randomUUID } from 'crypto'
 import * as fs from 'fs'
+import { promises as fsPromises } from 'fs'
 import * as path from 'path'
 
 @Injectable()
@@ -29,6 +32,36 @@ export class FileService {
     }
 
     return true
+  }
+
+  async uploadMessageFiles(
+    files: Express.Multer.File[],
+    userId: string,
+    chatId: string
+  ) {
+    const uploaded = []
+
+    for (const file of files) {
+      this.validateFile(file, 'message')
+
+      const ext = path.extname(file.originalname)
+      const safeName = `${randomUUID()}${ext}`
+      const relativePath = `uploads/messages/${chatId}/${userId}/${safeName}`
+      const absolutePath = path.join(process.cwd(), relativePath)
+
+      await fsPromises.mkdir(path.dirname(absolutePath), { recursive: true })
+      await fsPromises.writeFile(absolutePath, file.buffer)
+
+      uploaded.push({
+        url: `/${relativePath.replaceAll('\\', '/')}`,
+        fileName: file.originalname,
+        fileSize: file.size,
+        type: this.detectMediaType(file.mimetype),
+        safeName
+      })
+    }
+
+    return uploaded
   }
 
   async deleteFile(filePath: string) {
@@ -71,5 +104,12 @@ export class FileService {
   ): Promise<string> {
     this.validateFile(file, type)
     return this.getFileUrl(file.filename, type)
+  }
+
+  private detectMediaType(mimetype: string): EnumMediaType {
+    if (mimetype.startsWith('image/')) return EnumMediaType.IMAGE
+    if (mimetype.startsWith('video/')) return EnumMediaType.VIDEO
+    if (mimetype.startsWith('audio/')) return EnumMediaType.AUDIO
+    return EnumMediaType.DOCUMENT
   }
 }

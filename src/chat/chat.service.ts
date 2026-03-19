@@ -70,6 +70,7 @@ export class ChatService {
       if (!name) throw new BadRequestException('Ведите название канала')
 
       const userGroups = await this.findAll(userId, {
+        isMy: true,
         type: EnumChatType.CHANNEL
       })
 
@@ -82,6 +83,7 @@ export class ChatService {
       if (!name) throw new BadRequestException('Ведите название чата')
 
       const userChats = await this.findAll(userId, {
+        isMy: true,
         type: EnumChatType.GROUP
       })
 
@@ -151,6 +153,7 @@ export class ChatService {
     filter: ChatFilterDto
   ): Promise<PaginatedResponse<ChatResponseDto[]>> {
     const {
+      isMy,
       type,
       isPrivate,
       isArchived,
@@ -160,31 +163,41 @@ export class ChatService {
       limit = 20
     } = filter
 
+    let where: Prisma.ChatWhereInput
+
     // Базовый WHERE для чатов пользователя
-    const where: Prisma.ChatWhereInput = {
-      members: {
-        some: { userId }
-      },
-      ...(type && { type }),
-      ...(isPrivate !== undefined && { isPrivate }),
-      ...(search && {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          {
-            members: {
-              some: {
-                user: {
-                  OR: [
-                    { firstName: { contains: search, mode: 'insensitive' } },
-                    { lastName: { contains: search, mode: 'insensitive' } },
-                    { username: { contains: search, mode: 'insensitive' } }
-                  ]
+    if (isMy) {
+      where = {
+        members: {
+          some: { userId }
+        },
+        ...(type && { type }),
+        ...(isPrivate !== undefined && { isPrivate }),
+        ...(search && {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            {
+              members: {
+                some: {
+                  user: {
+                    OR: [
+                      { firstName: { contains: search, mode: 'insensitive' } },
+                      { lastName: { contains: search, mode: 'insensitive' } },
+                      { username: { contains: search, mode: 'insensitive' } }
+                    ]
+                  }
                 }
               }
             }
-          }
-        ]
-      })
+          ]
+        })
+      }
+    } else {
+      where = {
+        name: { contains: search, mode: 'insensitive' },
+        ...(type && { type }),
+        ...(isPrivate !== undefined && { isPrivate })
+      }
     }
 
     if (isArchived !== undefined) {
@@ -374,11 +387,6 @@ export class ChatService {
 
     if (!newChat) {
       throw new NotFoundException('Чат не найден')
-    }
-
-    const isMember = newChat.members.some(member => member.userId === userId)
-    if (!isMember) {
-      throw new ForbiddenException('У вас нет доступа к этому чату')
     }
 
     const unreadCount = await this.getUnreadCount(chatId, userId)
@@ -810,6 +818,15 @@ export class ChatService {
       }
     }
 
+    const msg = await this.prismaService.message.create({
+      data: {
+        chatId,
+        senderId: userId,
+        isSystem: true,
+        content: `Покинул(а) чат`
+      }
+    })
+
     await this.prismaService.chatMember.delete({
       where: {
         chatId_userId: {
@@ -819,13 +836,11 @@ export class ChatService {
       }
     })
 
-    await this.prismaService.message.create({
-      data: {
-        chatId,
-        senderId: userId,
-        isSystem: true,
-        content: `Покинул(а) чат`
-      }
+    const message = await this.messageService.findOne(msg.id, userId)
+
+    this.eventEmitter.emit('message.system.created', {
+      chatId: chat.id,
+      message
     })
 
     // Эмитим событие о выходе из чата
@@ -1119,6 +1134,67 @@ export class ChatService {
     return `${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/chats/join/${newlink}`
   }
 
+  async join(chatId: string, userId: string) {
+    const chat = await this.prismaService.chat.findUnique({
+      where: {
+        id: chatId
+      }
+    })
+
+    if (!chat) throw new ForbiddenException('Чат не найден')
+
+    const existingMember = await this.prismaService.chatMember.findUnique({
+      where: {
+        chatId_userId: {
+          chatId: chat.id,
+          userId
+        }
+      }
+    })
+
+    if (existingMember) {
+      throw new ConflictException('Вы уже являетесь участником этого чата')
+    }
+
+    const member = await this.prismaService.chatMember.create({
+      data: {
+        chatId: chat.id,
+        userId,
+        role: EnumMemberRole.MEMBER,
+        joinedAt: new Date()
+      }
+    })
+
+    const msg = await this.prismaService.message.create({
+      data: {
+        chatId: chat.id,
+        senderId: userId,
+        isSystem: true,
+        content: `Присоединился(ась) к чату`
+      }
+    })
+
+    await this.messageService.markAsRead(userId, chatId)
+
+    const message = await this.messageService.findOne(msg.id, userId)
+
+    const updatedChat = await this.findOne(chat.id, userId)
+
+    this.eventEmitter.emit('message.system.created', {
+      chatId,
+      message
+    })
+
+    // Эмитим событие о новом участнике
+    this.eventEmitter.emit('chat.participant.joined', {
+      chatId: chat.id,
+      newParticipantIds: [userId],
+      chat: updatedChat
+    })
+
+    return updatedChat
+  }
+
   /**
    * Присоединение по пригласительной ссылке
    */
@@ -1166,7 +1242,7 @@ export class ChatService {
       }
     })
 
-    await this.prismaService.message.create({
+    const msg = await this.prismaService.message.create({
       data: {
         chatId: chat.id,
         senderId: userId,
@@ -1175,7 +1251,14 @@ export class ChatService {
       }
     })
 
+    const message = await this.messageService.findOne(msg.id, userId)
+
     const updatedChat = await this.findOne(chat.id, userId)
+
+    this.eventEmitter.emit('message.system.created', {
+      chatId: chat.id,
+      message
+    })
 
     // Эмитим событие о новом участнике
     this.eventEmitter.emit('chat.participant.added', {

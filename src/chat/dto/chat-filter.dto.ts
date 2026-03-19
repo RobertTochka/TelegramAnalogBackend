@@ -1,5 +1,5 @@
 import { EnumChatType } from '@prisma/__generated__/enums'
-import { Type } from 'class-transformer'
+import { Transform, Type } from 'class-transformer'
 import {
   IsBoolean,
   IsEnum,
@@ -10,23 +10,27 @@ import {
 } from 'class-validator'
 
 export class ChatFilterDto {
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  isMy: boolean
+
   @IsEnum(EnumChatType)
   @IsOptional()
   type?: EnumChatType
 
+  @Transform(({ value }) => value === 'true')
   @IsBoolean()
   @IsOptional()
-  @Type(() => Boolean)
   isPrivate?: boolean
 
+  @Transform(({ value }) => value === 'true')
   @IsBoolean()
   @IsOptional()
-  @Type(() => Boolean)
   isArchived?: boolean
 
+  @Transform(({ value }) => value === 'true')
   @IsBoolean()
   @IsOptional()
-  @Type(() => Boolean)
   isMuted?: boolean
 
   @IsString()

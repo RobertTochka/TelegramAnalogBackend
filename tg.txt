@@ -1,0 +1,1705 @@
+'use client'
+
+import {
+  InfiniteData,
+  InfiniteQueryObserverResult
+} from '@tanstack/react-query'
+import { ArrowLeft, Loader2, Lock, MessageCircle, UserPlus } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
+import toast from 'react-hot-toast'
+
+import { api } from '@/api/api'
+import { useGetOneChat, useJoinChat } from '@/api/hooks/chat'
+import { useUploadFiles } from '@/api/hooks/messages/use-upload-files'
+
+import { Button } from '../ui'
+
+import { ChatHeader } from './ChatHeader'
+import { ChatWindow } from './ChatWindow'
+import { FileItem } from './FileItem'
+import { InputForm } from './InputForm'
+import { ForwardDialog } from './message/ForwardDialog'
+import { ReplyBanner } from './message/ReplyBanner'
+import {
+  ChatFilter,
+  CreateMessageDto,
+  EnumMessageStatus,
+  Message,
+  MessageFilter,
+  MessageSenderDto,
+  PaginatedResponse,
+  Profile
+} from '@/types'
+
+interface ChatContainerProps {
+  isEmpty: boolean
+  isFetchingNextPage: boolean
+  hasNextPage: boolean
+  isLoading: boolean
+  isMobile: boolean
+  chatId: string
+  messages: Message[]
+  typingUsers: Set<string>
+  currentUser: Profile
+  chatsQuery: ChatFilter
+  messagesQuery: Omit<MessageFilter, 'page'>
+  setMessagesQuery: Dispatch<SetStateAction<Omit<MessageFilter, 'page'>>>
+  setIsVisibleList: Dispatch<SetStateAction<boolean>>
+  fetchNextPage: () =>
+    | Promise<void>
+    | Promise<
+        InfiniteQueryObserverResult<
+          InfiniteData<PaginatedResponse<Message[]>, unknown>,
+          Error
+        >
+      >
+  onSelectChat: (chatId: string) => void
+  markAsRead: (messageIds?: string[] | undefined) => void
+  sendTyping: (isTyping: boolean) => void
+  deleteMessage: (messageId: string, forEveryone?: boolean) => void
+  editMessage: (messageId: string, content: string) => void
+  sendMessage: (
+    data: CreateMessageDto,
+    sender: MessageSenderDto,
+    replyTo?: Message,
+    forwardedFrom?: Message
+  ) => void
+}
+
+export const ChatContainer: FC<ChatContainerProps> = ({
+  isEmpty,
+  isFetchingNextPage,
+  hasNextPage,
+  isLoading,
+  isMobile,
+  chatId,
+  messages,
+  typingUsers,
+  currentUser,
+  chatsQuery,
+  messagesQuery,
+  setMessagesQuery,
+  setIsVisibleList,
+  fetchNextPage,
+  onSelectChat,
+  markAsRead,
+  sendTyping,
+  deleteMessage,
+  editMessage,
+  sendMessage
+}) => {
+  const searchParams = useSearchParams()
+  const [messageText, setMessageText] = useState('')
+  const [editingId, setEditingId] = useState('')
+  const [editing, setEditing] = useState(false)
+  const [editedText, setEditedText] = useState('')
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([])
+  const [replyTo, setReplyTo] = useState<Message | undefined>(undefined)
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false)
+  const [forwardedFrom, setForwardedFrom] = useState<Message | undefined>(
+    undefined
+  )
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const chatWindowRef = useRef<{
+    navigateToMessage: (id: string) => Promise<void>
+  } | null>(null)
+
+  const messagesQueryKey = ['messages', 'list', chatId]
+
+  const { chat, isLoadingChat } = useGetOneChat(chatId)
+
+  const { joinChat, isLoadingJoinChat } = useJoinChat()
+
+  const { uploadFiles, isUploadingFiles } = useUploadFiles()
+
+  const filteredMessages = useMemo(() => {
+    if (!messagesQuery.search) return messages
+
+    return messages.filter(message => {
+      return message.content
+        ?.toLowerCase()
+        .includes(messagesQuery.search!.toLowerCase())
+    })
+  }, [messages, messagesQuery.search])
+
+  useEffect(() => {
+    const chatIdFromQuery = searchParams.get('chatId')
+
+    if (chatIdFromQuery) {
+      onSelectChat(chatIdFromQuery)
+
+      const newUrl = window.location.pathname
+      window.history.replaceState({}, '', newUrl)
+    }
+  }, [searchParams])
+
+  useEffect(() => {
+    if (chatId && messages.length > 0) {
+      const unreadMessages = messages
+        .filter(msg => msg.sender!.id !== currentUser.id)
+        .filter(
+          msg => msg.statuses?.[currentUser.id] !== EnumMessageStatus.READ
+        )
+        .map(msg => msg.id)
+
+      markAsRead(unreadMessages)
+    }
+  }, [chatId, messages, currentUser.id, markAsRead])
+
+  const removeFile = (index: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  if (!chat) return null
+
+  const uploadMessageFiles = async (chatId: string, files: File[]) => {
+    const formData = new FormData()
+
+    files.forEach(file => {
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error('Файл слишком большой. Максимальный размер 20MB')
+        return
+      }
+      const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp'
+      ]
+      if (!allowedTypes.includes(file.type)) {
+        toast.error(
+          'Неподдерживаемый формат. Используйте JPEG, PNG, GIF или WEBP'
+        )
+        return
+      }
+      formData.append('files', file)
+    })
+
+    const data = await uploadFiles({ chatId, formData })
+
+    return data
+  }
+
+  const handleSendMessage = async (
+    forwardedFrom?: Message,
+    forwardContent?: string
+  ) => {
+    if (
+      (!messageText.trim() && attachedFiles.length === 0 && !forwardedFrom) ||
+      isUploadingFiles
+    )
+      return
+
+    const media =
+      attachedFiles.length > 0
+        ? await uploadMessageFiles(chat.id, attachedFiles)
+        : []
+
+    sendMessage(
+      { chat, content: forwardedFrom ? forwardContent : messageText, media },
+      {
+        id: currentUser.id,
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        avatar: currentUser.avatar
+      },
+      replyTo,
+      forwardedFrom
+    )
+
+    setMessageText('')
+    setAttachedFiles([])
+    setReplyTo(undefined)
+    sendTyping(false)
+  }
+
+  const handleJoinChat = () => {
+    if (isLoadingJoinChat) return
+
+    joinChat(chat.id)
+  }
+
+  const handleBack = () => {
+    onSelectChat('')
+
+    if (isMobile) setIsVisibleList(true)
+  }
+
+  const canJoin = !chat.isPrivate
+
+  const isParticipant =
+    chat.participants?.some(p => p.id === currentUser.id) || false
+
+  const isInitialLoading =
+    (!chat && isLoadingChat) || (messages.length === 0 && isLoading)
+
+  if (isInitialLoading) {
+    return (
+      <div className='flex h-full items-center justify-center'>
+        <div className='relative'>
+          <div className='absolute inset-0 animate-pulse rounded-full bg-linear-to-r from-purple-600/20 to-blue-600/20 blur-xl' />
+          <Loader2 className='relative h-8 w-8 animate-spin text-purple-500' />
+        </div>
+      </div>
+    )
+  }
+
+  if (!chat) {
+    return (
+      <div className='flex h-full flex-col items-center justify-center p-6'>
+        <div className='relative mb-6'>
+          {/* Анимированный фоновый круг */}
+          <div className='absolute inset-0 animate-pulse rounded-full bg-linear-to-r from-purple-600/20 to-blue-600/20 blur-2xl' />
+
+          {/* Иконка с градиентом */}
+          <div className='relative rounded-full bg-linear-to-r from-purple-600 to-blue-600 p-4 shadow-lg shadow-purple-500/25'>
+            <MessageCircle className='h-12 w-12 text-white' />
+          </div>
+        </div>
+
+        {/* Заголовок */}
+        <h3 className='mb-2 bg-linear-to-r from-white to-gray-400 bg-clip-text text-center text-2xl font-bold text-transparent'>
+          Выберите чат
+        </h3>
+
+        {/* Описание */}
+        <p className='max-w-sm text-center text-sm text-gray-400'>
+          Начните общение, выбрав существующий чат из списка слева или создайте
+          новый
+        </p>
+
+        {/* Декоративные элементы */}
+        <div className='mt-8 flex gap-2'>
+          <div className='h-1 w-1 rounded-full bg-purple-500/50' />
+          <div className='h-1 w-1 rounded-full bg-purple-500/50' />
+          <div className='h-1 w-1 rounded-full bg-purple-500/50' />
+        </div>
+
+        {/* Подсказка для мобильных */}
+        <div className='mt-8 flex items-center gap-2 text-xs text-gray-600 sm:hidden'>
+          <ArrowLeft className='h-3 w-3' />
+          <span>Выберите чат из списка</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className='flex h-full flex-col'>
+      <ChatHeader
+        currentUser={currentUser}
+        typingUsers={typingUsers}
+        chat={chat}
+        participant={chat.participants?.find(p => p.id !== currentUser.id)!}
+        onBack={handleBack}
+        isInfoModalOpen={isInfoModalOpen}
+        setIsInfoModalOpen={setIsInfoModalOpen}
+        messagesQueryKey={messagesQueryKey}
+        containerRef={messagesContainerRef}
+        chatWindowRef={chatWindowRef}
+        onSelectChat={onSelectChat}
+      />
+
+      <ChatWindow
+        ref={chatWindowRef}
+        chat={chat}
+        currentUser={currentUser}
+        typingUsers={typingUsers}
+        messages={filteredMessages}
+        isEmpty={isEmpty}
+        hasNextPage={hasNextPage}
+        isFetchingNextPage={isFetchingNextPage}
+        fetchNextPage={fetchNextPage}
+        setEditing={setEditing}
+        setEditedText={setEditedText}
+        setEditingId={setEditingId}
+        deleteMessage={deleteMessage}
+        setReplyTo={setReplyTo}
+        setForwardedFrom={setForwardedFrom}
+        pinnedMessage={chat.pinnedMessage}
+        containerRef={messagesContainerRef}
+        messagesQueryKey={messagesQueryKey}
+      />
+
+      {replyTo && (
+        <ReplyBanner
+          replyTo={replyTo}
+          onCancel={() => setReplyTo(undefined)}
+        />
+      )}
+
+      {/* Прикрепленные файлы */}
+      {attachedFiles.length > 0 && (
+        <div className='border-t border-white/5 bg-slate-900/50 p-2 backdrop-blur-sm'>
+          <div className='flex flex-wrap gap-2'>
+            {attachedFiles.map((file, index) => (
+              <FileItem
+                key={index}
+                file={file}
+                removeFile={() => removeFile(index)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Форма отправки */}
+      {isParticipant ? (
+        <InputForm
+          messageText={messageText}
+          setMessageText={setMessageText}
+          onSend={handleSendMessage}
+          attachedFiles={attachedFiles}
+          setAttachedFiles={setAttachedFiles}
+          editMessage={editMessage}
+          sendTyping={sendTyping}
+          editing={editing}
+          editedText={editedText}
+          setEditedText={setEditedText}
+          setEditing={setEditing}
+          editingId={editingId}
+          chat={chat}
+          currentUser={currentUser}
+        />
+      ) : (
+        <div className='border-t border-white/5 bg-slate-900/50 p-4 backdrop-blur-sm'>
+          {canJoin ? (
+            <Button
+              onClick={handleJoinChat}
+              className='w-full bg-linear-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+            >
+              <UserPlus className='mr-2 h-5 w-5' />
+              Вступить в чат
+            </Button>
+          ) : (
+            <div className='flex flex-col items-center justify-center gap-2 text-center'>
+              <Lock className='h-8 w-8 text-gray-500' />
+              <p className='text-sm text-gray-400'>
+                Это приватный чат. Только приглашенные участники могут вступить.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {!isParticipant && !canJoin && (
+        <div className='border-t border-white/5 bg-slate-900/50 p-6 backdrop-blur-sm'>
+          <div className='flex flex-col items-center justify-center gap-3 text-center'>
+            <div className='rounded-full bg-slate-800 p-3'>
+              <Lock className='h-6 w-6 text-purple-400' />
+            </div>
+            <div>
+              <h4 className='mb-1 text-sm font-medium text-white'>
+                Приватный чат
+              </h4>
+              <p className='max-w-xs text-xs text-gray-400'>
+                Это закрытый чат. Чтобы присоединиться, получите приглашение.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {forwardedFrom && (
+        <ForwardDialog
+          open={!!forwardedFrom}
+          onOpenChange={() => setForwardedFrom(undefined)}
+          message={forwardedFrom}
+          currentUserId={currentUser.id}
+          onForward={handleSendMessage}
+        />
+      )}
+    </div>
+  )
+}
+'use client'
+
+import {
+  InfiniteData,
+  InfiniteQueryObserverResult
+} from '@tanstack/react-query'
+import { ChevronDown, Loader2, MessageCircle } from 'lucide-react'
+import {
+  Dispatch,
+  forwardRef,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react'
+import toast from 'react-hot-toast'
+
+import { usePinMessageAction } from '@/api/hooks/chat'
+
+import { Button } from '../ui'
+
+import { MessageItem } from './message/MessageItem'
+import { PinnedMessageBar } from './PinnedMessageBar'
+import { UnpinMessageConfirmModal } from './UnpinMessageConfirmModal'
+import { Chat, Message, PaginatedResponse, Profile } from '@/types'
+
+interface ChatWindowProps {
+  chat: Chat
+  currentUser: Profile
+  typingUsers: Set<string>
+  messages: Message[]
+  isEmpty: boolean
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
+  fetchNextPage: () =>
+    | Promise<void>
+    | Promise<
+        InfiniteQueryObserverResult<
+          InfiniteData<PaginatedResponse<Message[]>, unknown>,
+          Error
+        >
+      >
+  setEditing: Dispatch<SetStateAction<boolean>>
+  setEditedText: Dispatch<SetStateAction<string>>
+  setEditingId: Dispatch<SetStateAction<string>>
+  deleteMessage: (messageId: string, forEveryone?: boolean) => void
+  setReplyTo: Dispatch<SetStateAction<Message | undefined>>
+  setForwardedFrom: Dispatch<SetStateAction<Message | undefined>>
+  pinnedMessage?: Message
+  containerRef: React.RefObject<HTMLDivElement | null>
+  messagesQueryKey: any[]
+}
+
+export type ChatWindowHandle = {
+  navigateToMessage: (messageId: string) => Promise<void>
+}
+
+export const ChatWindow = forwardRef<ChatWindowHandle, ChatWindowProps>(
+  function ChatWindow(
+    {
+      chat,
+      currentUser,
+      typingUsers,
+      messages,
+      isEmpty,
+      hasNextPage,
+      isFetchingNextPage,
+      fetchNextPage,
+      setEditing,
+      setEditedText,
+      setEditingId,
+      deleteMessage,
+      setReplyTo,
+      setForwardedFrom,
+      pinnedMessage,
+      containerRef,
+      messagesQueryKey
+    },
+    ref
+  ) {
+    const messagesEndRef = useRef<HTMLDivElement>(null)
+    const prevScrollHeightRef = useRef<number>(0)
+    const isInitialLoad = useRef(true)
+    const [isUnpinModalOpen, setIsUnpinModalOpen] = useState(false)
+    const [isVisible, setIsVisible] = useState(false)
+
+    const [isNavigatingToPinned, setIsNavigatingToPinned] = useState(false)
+    const [targetMessageId, setTargetMessageId] = useState<string | null>(null)
+    const pinnedMessageRef = useRef<HTMLDivElement>(null)
+    const externalNavigatingRef = useRef(false)
+
+    const { pinMessage, unpinMessage, isPinning, isUnpinning } =
+      usePinMessageAction(chat.id)
+
+    useLayoutEffect(() => {
+      prevScrollHeightRef.current = 0
+      isInitialLoad.current = true
+
+      if (messages.length > 0) {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' })
+        isInitialLoad.current = false
+      }
+    }, [chat.id])
+
+    useEffect(() => {
+      if (isInitialLoad.current && messages.length > 0) {
+        messagesEndRef.current?.scrollIntoView()
+        isInitialLoad.current = false
+      }
+      if (containerRef.current) {
+        const { scrollHeight, clientHeight, scrollTop } = containerRef.current
+        const isNearBottom = scrollHeight - clientHeight - scrollTop < 200
+
+        if (isNearBottom) {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+        }
+      }
+    }, [messages])
+
+    useEffect(() => {
+      if (
+        !isFetchingNextPage &&
+        prevScrollHeightRef.current &&
+        containerRef.current
+      ) {
+        const newScrollHeight = containerRef.current.scrollHeight
+        const scrollDiff = newScrollHeight - prevScrollHeightRef.current
+
+        containerRef.current.scrollTop = scrollDiff
+        prevScrollHeightRef.current = 0
+      }
+    }, [messages, isFetchingNextPage])
+
+    useLayoutEffect(() => {
+      if (!prevScrollHeightRef.current || !containerRef.current) return
+
+      const el = containerRef.current
+      const newHeight = el.scrollHeight
+
+      el.scrollTop = newHeight - prevScrollHeightRef.current
+      prevScrollHeightRef.current = 0
+    }, [messages])
+
+    useEffect(() => {
+      if (targetMessageId && !isNavigatingToPinned) {
+        const messageElement = document.getElementById(
+          `message-${targetMessageId}`
+        )
+        if (messageElement) {
+          // Плавно прокручиваем к сообщению
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+          // Подсвечиваем сообщение
+          messageElement.classList.add(
+            'bg-purple-500/10',
+            'transition-colors',
+            'duration-1000'
+          )
+          setTimeout(() => {
+            messageElement.classList.remove('bg-purple-500/10')
+          }, 2000)
+
+          // Также подсвечиваем закрепленное сообщение в баре
+          if (pinnedMessageRef.current) {
+            pinnedMessageRef.current.classList.add('bg-purple-500/10')
+            setTimeout(() => {
+              pinnedMessageRef.current?.classList.remove('bg-purple-500/10')
+            }, 2000)
+          }
+
+          setTargetMessageId(null)
+        }
+      }
+    }, [messages, targetMessageId, isNavigatingToPinned])
+
+    useEffect(() => {
+      const loadNextPageIfNeeded = async () => {
+        if (!isNavigatingToPinned || !targetMessageId) return
+
+        // Проверяем, есть ли целевое сообщение в загруженных
+        const messageExists = messages.some(m => m.id === targetMessageId)
+
+        if (!messageExists && hasNextPage && !isFetchingNextPage) {
+          // Сохраняем текущую высоту перед загрузкой
+          if (containerRef.current) {
+            prevScrollHeightRef.current = containerRef.current.scrollHeight
+          }
+          await fetchNextPage()
+        } else if (messageExists) {
+          // Сообщение найдено, завершаем навигацию
+          setIsNavigatingToPinned(false)
+        } else if (!hasNextPage) {
+          // Сообщение не найдено и больше нет страниц
+          setIsNavigatingToPinned(false)
+          setTargetMessageId(null)
+          // Здесь можно показать уведомление, что сообщение не найдено
+        }
+      }
+
+      loadNextPageIfNeeded()
+    }, [
+      isNavigatingToPinned,
+      targetMessageId,
+      messages,
+      hasNextPage,
+      isFetchingNextPage,
+      fetchNextPage
+    ])
+
+    const handleScroll = useCallback(() => {
+      const el = containerRef.current
+
+      if (!el) return
+
+      if (externalNavigatingRef.current) return
+
+      if (el.scrollTop < 100 && hasNextPage) {
+        prevScrollHeightRef.current = el.scrollHeight
+
+        fetchNextPage()
+      }
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage, containerRef])
+
+    const handleJumpToPinned = () => {
+      if (!pinnedMessage) return
+
+      const messageExists = messages.some(m => m.id === pinnedMessage.id)
+
+      if (messageExists) {
+        const messageElement = document.getElementById(
+          `message-${pinnedMessage.id}`
+        )
+        if (messageElement) {
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+          messageElement.classList.add(
+            'bg-purple-500/10',
+            'transition-colors',
+            'duration-1000'
+          )
+          setTimeout(() => {
+            messageElement.classList.remove('bg-purple-500/10')
+          }, 2000)
+
+          if (pinnedMessageRef.current) {
+            pinnedMessageRef.current.classList.add('bg-purple-500/10')
+            setTimeout(() => {
+              pinnedMessageRef.current?.classList.remove('bg-purple-500/10')
+            }, 2000)
+          }
+        }
+      } else {
+        setIsNavigatingToPinned(true)
+        setTargetMessageId(pinnedMessage.id)
+
+        if (hasNextPage && !isFetchingNextPage) {
+          if (containerRef.current) {
+            prevScrollHeightRef.current = containerRef.current.scrollHeight
+          }
+          fetchNextPage()
+        }
+      }
+    }
+
+    useEffect(() => {
+      const container = containerRef.current
+      if (!container) return
+
+      const checkScrollPosition = () => {
+        const { scrollTop, scrollHeight, clientHeight } = container
+        const isNearBottom = scrollHeight - clientHeight - scrollTop < 400
+        setIsVisible(!isNearBottom)
+      }
+
+      checkScrollPosition()
+
+      container.addEventListener('scroll', checkScrollPosition, {
+        passive: true
+      })
+
+      const resizeObserver = new ResizeObserver(() => {
+        checkScrollPosition()
+      })
+      resizeObserver.observe(container)
+
+      return () => {
+        container.removeEventListener('scroll', checkScrollPosition)
+        resizeObserver.disconnect()
+      }
+    }, [containerRef])
+
+    const getMessagePreview = (message: Message) => {
+      // if (message.files && message.files.length > 0) {
+      //   const file = message.files[0]
+      //   if (file.type.startsWith('image/')) return '📷 Фото'
+      //   if (file.type.startsWith('video/')) return '🎥 Видео'
+      //   if (file.type.startsWith('audio/')) return '🎵 Аудио'
+      //   return '📎 Файл'
+      // }
+      return message.content || 'Сообщение'
+    }
+
+    const handleUnpinMessage = () => {
+      if (isUnpinning || !pinnedMessage) return
+
+      unpinMessage(pinnedMessage.id)
+      setIsUnpinModalOpen(false)
+    }
+
+    const handlePinMessage = (messageId: string) => {
+      if (isPinning) return
+
+      pinMessage(messageId)
+    }
+
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+
+    const navigateToMessageFromExternal = useCallback(
+      async (messageId: string) => {
+        externalNavigatingRef.current = true
+        setIsNavigatingToPinned(true)
+        setTargetMessageId(messageId)
+
+        try {
+          const tryFindElement = () =>
+            document.getElementById(
+              `message-${messageId}`
+            ) as HTMLElement | null
+
+          // Если элемент уже в DOM — прокручиваем сразу к нему (и выходим)
+          const already = tryFindElement()
+          if (already) {
+            // Центрируем элемент вручную (надёжнее чем scrollIntoView)
+            const container = containerRef.current
+            if (container) {
+              const elTop = already.offsetTop
+              const elHeight = already.offsetHeight
+              const containerHeight = container.clientHeight
+              const targetScrollTop = Math.max(
+                0,
+                elTop - containerHeight / 2 + elHeight / 2
+              )
+              container.scrollTop = targetScrollTop
+            } else {
+              already.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }
+
+            already.classList.add(
+              'bg-purple-500/10',
+              'transition-colors',
+              'duration-1000'
+            )
+            setTimeout(() => already.classList.remove('bg-purple-500/10'), 2000)
+            return
+          }
+
+          // Иначе — загружаем страницы по очереди, пока не найдём элемент или не исчерпаем страницы
+          let iterations = 0
+          while (iterations < 50) {
+            iterations++
+            if (!hasNextPage) break
+
+            const el = containerRef.current
+            const oldHeight = el ? el.scrollHeight : 0
+            const oldScrollTop = el ? el.scrollTop : 0
+
+            // Ставим prevScrollHeightRef, чтобы эффекты восстановления позиции знали про загрузку
+            if (prevScrollHeightRef) prevScrollHeightRef.current = oldHeight
+
+            // Запускаем fetchNextPage (родительский fetchNextPage должен вернуть промис или undefined)
+            try {
+              const r = fetchNextPage()
+              if (r && typeof (r as any).then === 'function') {
+                await r
+              } else {
+                // если не промис — ждём чуть-чуть, чтобы react-query / React обновили кэш и DOM
+                await new Promise(res => setTimeout(res, 160))
+              }
+            } catch (err) {
+              console.error(
+                'fetchNextPage failed during navigateToMessage',
+                err
+              )
+              break
+            }
+
+            // Даем React отрисовать DOM
+            await new Promise(r => setTimeout(r, 120))
+            // безопасный RAF
+            await new Promise(resolve =>
+              requestAnimationFrame(() => resolve(undefined))
+            )
+
+            // Проверяем, появился ли элемент
+            const found = tryFindElement()
+            if (found && containerRef.current) {
+              // Вычисляем позицию и центрируем
+              const container = containerRef.current
+              // offsetTop даёт позицию относительно прокручиваемого контейнера (если нет вложенных offsetParents)
+              // Для надёжности, вычислим через getBoundingClientRect
+              const containerRect = container.getBoundingClientRect()
+              const foundRect = found.getBoundingClientRect()
+              const relativeTop =
+                foundRect.top - containerRect.top + container.scrollTop
+              const targetScrollTop = Math.max(
+                0,
+                Math.floor(
+                  relativeTop -
+                    container.clientHeight / 2 +
+                    found.offsetHeight / 2
+                )
+              )
+
+              container.scrollTop = targetScrollTop
+
+              // Убедимся, что дополнительные эффекты восстановления не испортят позицию
+              prevScrollHeightRef.current = 0
+
+              // Подсветка
+              found.classList.add(
+                'bg-purple-500/10',
+                'transition-colors',
+                'duration-1000'
+              )
+              setTimeout(() => found.classList.remove('bg-purple-500/10'), 2000)
+
+              return
+            }
+
+            // Если не найдено — цикл повторится и подгрузим ещё страницу
+          }
+
+          // Если цикл завершился без нахождения — можно показать toast
+          toast.error('Сообщение не найдено')
+        } finally {
+          externalNavigatingRef.current = false
+          setIsNavigatingToPinned(false)
+          setTargetMessageId(null)
+          // страховка: обнулим prevScrollHeightRef
+          if (prevScrollHeightRef) prevScrollHeightRef.current = 0
+        }
+      },
+      [
+        containerRef,
+        fetchNextPage,
+        hasNextPage,
+        prevScrollHeightRef,
+        setIsNavigatingToPinned
+      ]
+    )
+
+    // expose imperative handle
+    useImperativeHandle(
+      ref,
+      () => ({
+        navigateToMessage: navigateToMessageFromExternal
+      }),
+      [navigateToMessageFromExternal]
+    )
+
+    return (
+      <>
+        {pinnedMessage && (
+          <div ref={pinnedMessageRef}>
+            <PinnedMessageBar
+              pinnedMessage={pinnedMessage}
+              currentUserId={currentUser.id}
+              onUnpin={() => setIsUnpinModalOpen(true)}
+              onJumpToMessage={handleJumpToPinned}
+              isLoading={isNavigatingToPinned}
+            />
+          </div>
+        )}
+
+        {isNavigatingToPinned && (
+          <div className='justify flex items-center gap-2 border-b border-white/5 bg-slate-900/90 px-4 py-2 text-sm text-purple-400 backdrop-blur-sm'>
+            <Loader2 className='h-4 w-4 animate-spin' />
+            <span>Загружаем закрепленное сообщение...</span>
+          </div>
+        )}
+
+        <div
+          className='custom-scrollbar flex-1 overflow-y-auto px-4'
+          onScroll={handleScroll}
+          ref={containerRef}
+        >
+          <div className='space-y-4 px-6 py-4'>
+            {isFetchingNextPage && (
+              <div className='flex justify-center py-2'>
+                <Loader2 className='h-5 w-5 animate-spin text-purple-500' />
+              </div>
+            )}
+
+            {!isEmpty ? (
+              messages.map((message, index) => (
+                <MessageItem
+                  key={message.id}
+                  message={message}
+                  currentUserId={currentUser.id}
+                  showAvatar={
+                    index === 0 ||
+                    messages[index - 1]?.sender?.id !== message.sender?.id
+                  }
+                  setEditing={setEditing}
+                  setEditedText={setEditedText}
+                  setEditingId={setEditingId}
+                  deleteMessage={deleteMessage}
+                  containerRef={containerRef}
+                  setReplyTo={setReplyTo}
+                  setForwardedFrom={setForwardedFrom}
+                  onPinMessage={handlePinMessage}
+                  chat={chat}
+                  viewsCount={message.viewsCount}
+                />
+              ))
+            ) : (
+              <div className='mt-10 flex h-full flex-col items-center justify-center text-center'>
+                <div className='relative mb-6'>
+                  <div className='absolute inset-0 animate-pulse rounded-full bg-linear-to-r from-purple-600/20 to-blue-600/20 blur-xl' />
+                  <div className='relative rounded-full bg-linear-to-r from-purple-600 to-blue-600 p-4'>
+                    <MessageCircle className='h-12 w-12 text-white' />
+                  </div>
+                </div>
+                <h3 className='mb-2 text-xl font-semibold text-white'>
+                  Начните общение, написав первое сообщение
+                </h3>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {isVisible && (
+            <div className='absolute right-6 bottom-24 z-10 flex flex-col items-end gap-2'>
+              <Button
+                onClick={scrollToBottom}
+                size='icon'
+                className='h-10 w-10 rounded-full border-2 border-white/10 bg-linear-to-r from-purple-600 to-blue-600 opacity-70 shadow-lg transition-all duration-200 hover:scale-105 hover:from-purple-700 hover:to-blue-700'
+              >
+                <ChevronDown className='h-6 w-6 text-white' />
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {pinnedMessage && (
+          <UnpinMessageConfirmModal
+            open={isUnpinModalOpen}
+            onOpenChange={setIsUnpinModalOpen}
+            onConfirm={handleUnpinMessage}
+            messagePreview={getMessagePreview(pinnedMessage)}
+          />
+        )}
+      </>
+    )
+  }
+)
+import { Copy, Forward, Pencil, Pin, Reply, Trash } from 'lucide-react'
+import {
+  Dispatch,
+  RefObject,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
+import toast from 'react-hot-toast'
+
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+  ContextMenu,
+  ContextMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui'
+
+import { ChannelMessageBubble } from './ChannelMessageBubble'
+import { DeleteMessageDialog } from './DeleteMessageDialog'
+import { ForwardedMessagesModal } from './ForwardedMessagesModal'
+import { MessageBubble } from './MessageBubble'
+import { SystemMessage } from './SystemMessage'
+import { Chat, EnumChatType, EnumParticipantRole, Message } from '@/types'
+
+interface MessageItem {
+  message: Message
+  currentUserId: string
+  showAvatar: boolean
+  deleteMessage: (messageId: string, forEveryone?: boolean) => void
+  onPinMessage: (messageId: string) => void
+  setEditing: Dispatch<SetStateAction<boolean>>
+  setEditedText: Dispatch<SetStateAction<string>>
+  setEditingId: Dispatch<SetStateAction<string>>
+  containerRef?: RefObject<HTMLDivElement | null>
+  setReplyTo: Dispatch<SetStateAction<Message | undefined>>
+  setForwardedFrom: Dispatch<SetStateAction<Message | undefined>>
+  chat?: Chat
+  viewsCount?: number
+}
+
+export const MessageItem = ({
+  message,
+  currentUserId,
+  showAvatar,
+  deleteMessage,
+  onPinMessage,
+  setEditing,
+  setEditedText,
+  setEditingId,
+  containerRef,
+  setReplyTo,
+  setForwardedFrom,
+  chat,
+  viewsCount = 0
+}: MessageItem) => {
+  const [isForwardModalOpen, setIsForwardModalOpen] = useState(false)
+  const [deletingMessage, setDeletingMessage] = useState<string | undefined>(
+    undefined
+  )
+  const [menuPosition, setMenuPosition] = useState<'top' | 'bottom'>('bottom')
+  const messageRef = useRef<HTMLDivElement>(null)
+
+  const isOwn = message.sender?.id === currentUserId
+  const isChannel = chat?.type === EnumChatType.CHANNEL
+
+  // Определяем позицию меню в зависимости от положения сообщения в контейнере
+  useEffect(() => {
+    if (messageRef.current && containerRef?.current) {
+      const messageRect = messageRef.current.getBoundingClientRect()
+      const containerRect = containerRef.current.getBoundingClientRect()
+      const messageBottom = messageRect.bottom - containerRect.top
+      const containerHeight = containerRect.height
+
+      // Если сообщение в нижней части контейнера (нижние 200px), меню открываем вверх
+      if (containerHeight - messageBottom < 200) {
+        setMenuPosition('top')
+      } else {
+        setMenuPosition('bottom')
+      }
+    }
+  }, [message.id, containerRef])
+
+  const canSendInChannel = useMemo(() => {
+    if (!isChannel) return true
+
+    const currentParticipant = chat?.participants?.find(
+      p => p.id === currentUserId
+    )
+    return (
+      currentParticipant?.role === EnumParticipantRole.OWNER ||
+      currentParticipant?.role === EnumParticipantRole.ADMIN
+    )
+  }, [isChannel, chat, currentUserId])
+
+  const canInteract = useMemo(() => {
+    if (!isChannel) return true
+    return canSendInChannel
+  }, [isChannel, canSendInChannel])
+
+  const copyMessage = () => {
+    navigator.clipboard.writeText(message.content || '')
+    toast.success('Сообщение скопировано')
+  }
+
+  const handleDelete = (forEveryone: boolean) => {
+    if (!deletingMessage) return
+    deleteMessage(deletingMessage, forEveryone)
+  }
+
+  const getForwardedChain = (msg: Message): Message[] => {
+    const chain: Message[] = []
+    let current: Message | undefined = msg
+
+    while (current?.forwardedFrom) {
+      chain.push(current.forwardedFrom)
+      current = current.forwardedFrom
+    }
+
+    return chain
+  }
+
+  const forwardedChain = message.forwardedFrom
+    ? [message.forwardedFrom, ...getForwardedChain(message.forwardedFrom)]
+    : []
+
+  if (message.isSystem) {
+    return (
+      <div
+        id={`message-${message.id}`}
+        ref={messageRef}
+        className='select-none'
+      >
+        <SystemMessage
+          message={message}
+          currentUserId={currentUserId}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div
+        id={`message-${message.id}`}
+        ref={messageRef}
+        className={`flex ${isChannel ? 'justify-start' : isOwn ? 'justify-end' : 'justify-start'}`}
+      >
+        <div
+          className={`flex max-w-[70%] items-end gap-2 ${
+            isChannel ? 'flex-row' : isOwn ? 'flex-row-reverse' : 'flex-row'
+          }`}
+        >
+          {/* Аватар для канала (всегда слева) */}
+          {!isChannel && !isOwn && showAvatar && (
+            <Avatar className='h-8 w-8 shrink-0 sm:h-5 sm:w-5'>
+              <AvatarImage src={message.sender?.avatar} />
+              <AvatarFallback>
+                {message.sender?.firstName?.[0]}
+                {message.sender?.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+          )}
+
+          {/* Context menu */}
+          <ContextMenu>
+            <ContextMenuTrigger asChild>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  asChild
+                  disabled={message.isSystem || (isChannel && !canInteract)}
+                >
+                  <div
+                    className='inline-block cursor-pointer'
+                    onClick={e => e.stopPropagation()}
+                  >
+                    {isChannel ? (
+                      <ChannelMessageBubble
+                        currentUserId={currentUserId}
+                        isOwn={isOwn}
+                        message={message}
+                        showAvatar={showAvatar}
+                        isAdmin={canSendInChannel}
+                        viewsCount={viewsCount}
+                      />
+                    ) : (
+                      <MessageBubble
+                        currentUserId={currentUserId}
+                        isOwn={isOwn}
+                        message={message}
+                        showAvatar={showAvatar}
+                        setIsForwardModalOpen={setIsForwardModalOpen}
+                        forwardedChain={forwardedChain}
+                      />
+                    )}
+                  </div>
+                </DropdownMenuTrigger>
+
+                {canInteract && (
+                  <DropdownMenuContent
+                    align={isOwn ? 'end' : 'start'}
+                    side={menuPosition}
+                    className='z-50 border-white/5 bg-slate-900 text-white'
+                  >
+                    {!isChannel && (
+                      <DropdownMenuItem
+                        onClick={() => setReplyTo(message)}
+                        className='cursor-pointer hover:bg-slate-800'
+                      >
+                        <Reply className='mr-2 h-4 w-4' />
+                        Ответить
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuItem
+                      onClick={() => setForwardedFrom(message)}
+                      className='cursor-pointer hover:bg-slate-800'
+                    >
+                      <Forward className='mr-2 h-4 w-4' />
+                      Переслать
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem
+                      onClick={copyMessage}
+                      className='cursor-pointer hover:bg-slate-800'
+                    >
+                      <Copy className='mr-2 h-4 w-4' />
+                      Копировать
+                    </DropdownMenuItem>
+
+                    {(isOwn || (canSendInChannel && isChannel)) && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          setEditing(true)
+                          setEditedText(message.content || '')
+                          setEditingId(message.id)
+                        }}
+                        className='cursor-pointer hover:bg-slate-800'
+                      >
+                        <Pencil className='mr-2 h-4 w-4' />
+                        Редактировать
+                      </DropdownMenuItem>
+                    )}
+
+                    {canSendInChannel && (
+                      <DropdownMenuItem
+                        onClick={() => onPinMessage(message.id)}
+                        className='cursor-pointer hover:bg-slate-800'
+                      >
+                        <Pin className='mr-2 h-4 w-4' />
+                        Закрепить
+                      </DropdownMenuItem>
+                    )}
+
+                    {(isOwn || canSendInChannel) && (
+                      <DropdownMenuItem
+                        className='cursor-pointer text-red-500 hover:bg-slate-800 hover:text-red-400'
+                        onClick={() => setDeletingMessage(message.id)}
+                      >
+                        <Trash className='mr-2 h-4 w-4' />
+                        Удалить
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                )}
+              </DropdownMenu>
+            </ContextMenuTrigger>
+          </ContextMenu>
+        </div>
+      </div>
+
+      {/* Модальное окно для длинной цепочки пересланных сообщений */}
+      <ForwardedMessagesModal
+        open={isForwardModalOpen}
+        onOpenChange={setIsForwardModalOpen}
+        messages={forwardedChain}
+        currentUserId={currentUserId}
+      />
+
+      <DeleteMessageDialog
+        open={!!deletingMessage}
+        onOpenChange={() => setDeletingMessage(undefined)}
+        onDelete={handleDelete}
+        isOwn={isOwn}
+      />
+    </>
+  )
+}
+import {
+  Check,
+  CheckCheck,
+  CircleAlert,
+  Clock,
+  CornerUpRight,
+  Forward
+} from 'lucide-react'
+import { Dispatch, SetStateAction, useState } from 'react'
+
+import { formatLongWords, formatMessageTime } from '@/utils/functions'
+
+import { ForwardedMessagesPreview } from './ForwardedMessagesPreview'
+import { EnumMessageStatus, Message } from '@/types'
+
+interface MessageBubbleProps {
+  isOwn: boolean
+  currentUserId: string
+  message: Message
+  showAvatar: boolean
+  setIsForwardModalOpen: Dispatch<SetStateAction<boolean>>
+  forwardedChain: Message[]
+}
+
+export const MessageBubble = ({
+  isOwn,
+  currentUserId,
+  message,
+  showAvatar,
+  setIsForwardModalOpen,
+  forwardedChain
+}: MessageBubbleProps) => {
+  const getMessageStatusIcon = () => {
+    if (!isOwn) return null
+
+    const status = message.statuses?.[currentUserId]
+
+    if (status === EnumMessageStatus.READ) {
+      return <CheckCheck className='h-3 w-3 text-blue-400' />
+    }
+    if (status === EnumMessageStatus.DELIVERED) {
+      return <Check className='h-3 w-3 text-gray-300' />
+    }
+    if (status === EnumMessageStatus.SENT) {
+      return <Clock className='h-3 w-3 text-gray-300' />
+    }
+    if (status === EnumMessageStatus.FAILED)
+      return <CircleAlert className='h-3 w-3 text-red-500' />
+  }
+
+  const getMargin = () => {
+    if (isOwn) return 'items-end mr-10 sm:mr-7'
+    if (!isOwn && showAvatar) return 'items-start'
+    if (!isOwn && !showAvatar) return 'items-start ml-10 sm:ml-7'
+  }
+
+  const hasLongForwardChain = forwardedChain.length > 3
+
+  // Определяем, нужно ли показывать блок с пересланными сообщениями
+  const hasForwardedContent = message.forwardedFrom && forwardedChain.length > 0
+
+  const handleOpenForwardModal = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setIsForwardModalOpen(true)
+  }
+
+  return (
+    <>
+      <div
+        className={`group relative max-w-full ${getMargin()}`}
+        onClick={e => e.stopPropagation()} // Предотвращаем всплытие
+      >
+        {/* Блок сообщения */}
+        <div
+          className={`relative rounded-2xl px-4 py-2 wrap-break-word ${
+            isOwn
+              ? 'rounded-br-none bg-purple-600 text-white'
+              : 'rounded-bl-none bg-slate-700 text-white'
+          } ${message.replyTo ? 'pt-3' : ''} ${
+            hasForwardedContent ? 'pt-3' : ''
+          }`}
+          onClick={e => e.stopPropagation()} // Предотвращаем всплытие
+        >
+          {/* Ответ на сообщение */}
+          {message.replyTo && (
+            <div
+              className={`mb-2 rounded-lg border-l-4 py-1.5 pr-4 pl-3 text-sm ${
+                isOwn
+                  ? 'border-purple-300 bg-purple-500/50'
+                  : 'border-slate-500 bg-slate-600/50'
+              }`}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className='mb-0.5 flex items-center gap-1 text-xs opacity-90'>
+                <CornerUpRight className='h-3 w-3' />
+                <span className='font-medium'>
+                  {message.replyTo.sender?.id === currentUserId
+                    ? 'Вы'
+                    : message.replyTo.sender?.firstName}
+                </span>
+              </div>
+              <div className='line-clamp-2 text-xs opacity-90 sm:text-xs'>
+                {message.replyTo.content || '📎 Медиафайл'}
+              </div>
+            </div>
+          )}
+
+          {/* Индикатор пересылки */}
+          {hasForwardedContent && (
+            <div
+              className='mb-2 flex items-center gap-1.5 text-xs opacity-80'
+              onClick={e => e.stopPropagation()}
+            >
+              <Forward className='h-3.5 w-3.5' />
+              <span className='font-medium'>Пересланное сообщение</span>
+            </div>
+          )}
+
+          {/* Цепочка пересланных сообщений */}
+          {hasForwardedContent && (
+            <div
+              className='mb-2 space-y-2'
+              onClick={e => e.stopPropagation()}
+            >
+              {hasLongForwardChain ? (
+                <ForwardedMessagesPreview
+                  messages={forwardedChain}
+                  isOwn={isOwn}
+                  currentUserId={currentUserId}
+                  onViewAll={handleOpenForwardModal}
+                />
+              ) : (
+                forwardedChain.map((forwardedMsg, idx) => (
+                  <div
+                    key={`forward-${idx}-${forwardedMsg.id}`}
+                    className={`rounded-lg p-2 ${
+                      isOwn ? 'bg-purple-500/30' : 'bg-slate-600/50'
+                    }`}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className='mb-1 flex items-center gap-1 text-xs opacity-80'>
+                      <span className='font-medium'>
+                        {forwardedMsg.sender?.id === currentUserId
+                          ? 'Вы'
+                          : forwardedMsg.sender?.firstName}
+                      </span>
+                    </div>
+                    <div className='text-xs wrap-break-word whitespace-pre-wrap opacity-90'>
+                      {formatLongWords(forwardedMsg.content || '📎 Медиафайл')}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Основной текст сообщения */}
+          {message.content && (
+            <div className='wrap-break-word whitespace-pre-wrap'>
+              {message.media.length > 0 && 'МЕДИА'}
+              {formatLongWords(message.content)}
+            </div>
+          )}
+
+          {/* Время и статус */}
+          <div
+            className={`mt-1 flex items-center justify-end gap-1 text-xs ${
+              isOwn ? 'text-purple-200' : 'text-gray-300'
+            }`}
+          >
+            {message.isEdited && <span>ред.</span>}
+            <span>{formatMessageTime(message.createdAt)}</span>
+            {isOwn && getMessageStatusIcon()}
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+// ChannelMessageBubble.tsx
+import { Eye, Forward } from 'lucide-react'
+import { useState } from 'react'
+
+import { formatLongWords, formatMessageTime } from '@/utils/functions'
+
+import { ForwardedMessagesModal } from './ForwardedMessagesModal'
+import { ForwardedMessagesPreview } from './ForwardedMessagesPreview'
+import { Message } from '@/types'
+
+interface ChannelMessageBubbleProps {
+  isOwn: boolean
+  currentUserId: string
+  message: Message
+  showAvatar: boolean
+  isAdmin: boolean
+  viewsCount: number
+}
+
+export const ChannelMessageBubble = ({
+  isOwn,
+  currentUserId,
+  message,
+  showAvatar,
+  isAdmin,
+  viewsCount
+}: ChannelMessageBubbleProps) => {
+  const [isForwardModalOpen, setIsForwardModalOpen] = useState(false)
+
+  const getForwardedChain = (msg: Message): Message[] => {
+    const chain: Message[] = []
+    let current: Message | undefined = msg
+
+    while (current?.forwardedFrom) {
+      chain.push(current.forwardedFrom)
+      current = current.forwardedFrom
+    }
+
+    return chain
+  }
+
+  const forwardedChain = message.forwardedFrom
+    ? [message.forwardedFrom, ...getForwardedChain(message.forwardedFrom)]
+    : []
+
+  const hasLongForwardChain = forwardedChain.length > 3
+
+  const handleOpenForwardModal = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    setIsForwardModalOpen(true)
+  }
+
+  return (
+    <>
+      <div
+        className='flex items-start gap-2'
+        onClick={e => e.stopPropagation()}
+      >
+        {showAvatar && (
+          <div className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-purple-600 to-blue-600 text-xs font-medium'>
+            {message.sender?.firstName?.[0]}
+            {message.sender?.lastName?.[0]}
+          </div>
+        )}
+
+        <div className={`max-w-full ${!showAvatar ? 'ml-10' : ''}`}>
+          {showAvatar && (
+            <div className='mb-1 flex items-center gap-2'>
+              <span className='text-sm font-medium text-white'>
+                {message.sender?.firstName} {message.sender?.lastName}
+              </span>
+              {isAdmin && (
+                <span className='text-xs text-purple-400'>• админ</span>
+              )}
+            </div>
+          )}
+
+          <div
+            className={`relative rounded-2xl px-4 py-2 wrap-break-word ${
+              isOwn ? 'bg-purple-600 text-white' : 'bg-slate-700 text-white'
+            } ${message.replyTo || message.forwardedFrom ? 'pt-3' : ''}`}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Индикатор пересылки */}
+            {message.forwardedFrom && (
+              <div className='mb-2 flex items-center gap-1.5 text-xs opacity-80'>
+                <Forward className='h-3.5 w-3.5' />
+                <span className='font-medium'>Пересланное сообщение</span>
+              </div>
+            )}
+
+            {/* Цепочка пересланных сообщений */}
+            {message.forwardedFrom && (
+              <div className='mb-2 space-y-2'>
+                {hasLongForwardChain ? (
+                  <ForwardedMessagesPreview
+                    messages={forwardedChain}
+                    isOwn={isOwn}
+                    currentUserId={currentUserId}
+                    onViewAll={handleOpenForwardModal}
+                  />
+                ) : (
+                  forwardedChain.map((forwardedMsg, idx) => (
+                    <div
+                      key={`forward-${idx}-${forwardedMsg.id}`}
+                      className={`rounded-lg p-2 ${
+                        isOwn ? 'bg-purple-500/30' : 'bg-slate-600/50'
+                      }`}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <div className='mb-1 flex items-center gap-1 text-xs opacity-80'>
+                        <span className='font-medium'>
+                          {forwardedMsg.sender?.id === currentUserId
+                            ? 'Вы'
+                            : forwardedMsg.sender?.firstName}
+                        </span>
+                      </div>
+                      <div className='text-xs wrap-break-word whitespace-pre-wrap opacity-90'>
+                        {formatLongWords(
+                          forwardedMsg.content || '📎 Медиафайл'
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Основной текст */}
+            {message.content && !message.forwardedFrom && (
+              <div className='wrap-break-word whitespace-pre-wrap'>
+                {formatLongWords(message.content)}
+              </div>
+            )}
+
+            {/* Время и просмотры */}
+            <div className='mt-1 flex items-center justify-end gap-2 text-xs text-gray-300'>
+              {message.isEdited && <span>ред.</span>}
+              <span>{formatMessageTime(message.createdAt)}</span>
+              <div className='flex items-center gap-1'>
+                <Eye className='h-3 w-3' />
+                <span>{viewsCount}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ForwardedMessagesModal
+        open={isForwardModalOpen}
+        onOpenChange={setIsForwardModalOpen}
+        messages={forwardedChain}
+        currentUserId={currentUserId}
+      />
+    </>
+  )
+}
+import { Chat } from './chat.interface'
+
+export interface Message {
+  id: string
+  chatId: string
+  sender?: MessageSenderDto
+  content?: string
+  isSystem: boolean
+  replyTo?: Message
+  forwardedFrom?: Message
+  media: Media[]
+  statuses: Record<string, EnumMessageStatus>
+  createdAt: string
+  isEdited: boolean
+  viewsCount: number
+}
+
+export interface MessageFilter {
+  chatId?: string
+  senderId?: string
+  fromDate?: string
+  cursor?: string
+  limit?: number
+  search?: string
+}
+
+export interface CreateMessageDto {
+  chat: Chat
+  content?: string
+  replyToId?: string
+  forwardedFromId?: string
+  media?: Media[]
+}
+
+export interface MessageSenderDto {
+  id: string
+  firstName: string
+  lastName: string
+  avatar: string
+}
+
+export interface TypingEvent {
+  chatId: string
+  userId: string
+  isTyping: boolean
+}
+
+export interface MessageStatusEvent {
+  chatId: string
+  messageId: string
+  status: EnumMessageStatus
+  userId: string
+}
+
+export interface ReadReceiptEvent {
+  chatId: string
+  messages: {
+    id: string
+    sender: {
+      id: string
+    }
+  }[]
+  readAt: string
+}
+
+export interface Media {
+  type: EnumMediaType
+  url: string
+  fileName?: string
+  fileSize?: number
+  safeName?: string
+}
+
+export enum EnumMediaType {
+  IMAGE = 'IMAGE',
+  VIDEO = 'VIDEO',
+  AUDIO = 'AUDIO',
+  DOCUMENT = 'DOCUMENT',
+  VOICE = 'VOICE',
+  GIF = 'GIF'
+}
+
+export enum EnumMessageStatus {
+  SENT = 'SENT',
+  DELIVERED = 'DELIVERED',
+  READ = 'READ',
+  FAILED = 'FAILED',
+  DELETED = 'DELETED'
+}

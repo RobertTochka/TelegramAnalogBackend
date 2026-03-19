@@ -253,6 +253,16 @@ export class ChatController {
 
   @Authorization()
   @HttpCode(HttpStatus.OK)
+  @Post('join')
+  async join(
+    @Authorized('id') userId: string,
+    @Body() { chatId }: { chatId: string }
+  ) {
+    return this.chatService.join(chatId, userId)
+  }
+
+  @Authorization()
+  @HttpCode(HttpStatus.OK)
   @Post(':chatId/messages/:messageId/pin')
   async pinMessage(
     @Authorized('id') userId: string,
