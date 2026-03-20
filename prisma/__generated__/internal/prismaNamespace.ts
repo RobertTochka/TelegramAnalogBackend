@@ -1475,6 +1475,7 @@ export const ChatMemberScalarFieldEnum = {
   id: 'id',
   joinedAt: 'joinedAt',
   lastReadAt: 'lastReadAt',
+  deletedAt: 'deletedAt',
   role: 'role',
   chatId: 'chatId',
   userId: 'userId'

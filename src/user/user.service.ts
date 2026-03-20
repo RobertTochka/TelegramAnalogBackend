@@ -93,8 +93,7 @@ export class UserService {
     const { search, cursor } = filter
     const limit = Number(filter.limit) || 20
 
-    const q = search?.trim()
-    if (!q) {
+    if (!search.trim().replace('@', '').length) {
       return {
         data: [],
         meta: {
@@ -106,14 +105,32 @@ export class UserService {
       }
     }
 
-    const where: Prisma.UserWhereInput = {
+    let where: Prisma.UserWhereInput = {
       deletedAt: null,
       id: { not: userId },
       OR: [
-        { username: { contains: q, mode: 'insensitive' } },
-        { firstName: { contains: q, mode: 'insensitive' } },
-        { lastName: { contains: q, mode: 'insensitive' } }
+        { username: { contains: search, mode: 'insensitive' } },
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } }
       ]
+    }
+
+    if (!search.includes('@')) {
+      where = {
+        deletedAt: null,
+        id: { not: userId },
+        OR: [
+          { username: { contains: search, mode: 'insensitive' } },
+          { firstName: { contains: search, mode: 'insensitive' } },
+          { lastName: { contains: search, mode: 'insensitive' } }
+        ]
+      }
+    } else {
+      where = {
+        deletedAt: null,
+        id: { not: userId },
+        username: { contains: search.replace('@', ''), mode: 'insensitive' }
+      }
     }
 
     const total = await this.prismaService.user.count({ where })

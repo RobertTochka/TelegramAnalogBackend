@@ -98,6 +98,7 @@ model ChatMember {
     id         String    @id @default(cuid())
     joinedAt   DateTime  @default(now()) @map("joined_at")
     lastReadAt DateTime? @map("last_read_at")
+    deletedAt  DateTime? @map("deleted_at")
 
     role EnumMemberRole @default(MEMBER)
 

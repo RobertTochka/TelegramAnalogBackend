@@ -169,7 +169,7 @@ export class ChatService {
     if (isMy) {
       where = {
         members: {
-          some: { userId }
+          some: { userId, deletedAt: null }
         },
         ...(type && { type }),
         ...(isPrivate !== undefined && { isPrivate }),
@@ -177,8 +177,10 @@ export class ChatService {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },
             {
+              type: EnumChatType.DIRECT,
               members: {
                 some: {
+                  userId: { not: userId },
                   user: {
                     OR: [
                       { firstName: { contains: search, mode: 'insensitive' } },
@@ -446,21 +448,48 @@ export class ChatService {
     }
 
     // Проверяем, что пользователь - владелец
-    const member = chat.members.find(m => m.userId === userId)
-    if (!member || member.role !== EnumMemberRole.OWNER) {
-      throw new ForbiddenException('Только владелец может удалить чат')
+    const member = chat.members.find(
+      m => m.userId === userId && m.deletedAt === null
+    )
+    if (!member) {
+      throw new ForbiddenException('Вы не состоите в этом чате')
     }
 
-    const participantIds = chat.members.map(m => m.userId)
+    await this.clearHistory(chatId, userId)
 
-    await this.prismaService.chat.delete({
-      where: { id: chatId }
+    await this.prismaService.chatMember.update({
+      where: {
+        chatId_userId: {
+          chatId,
+          userId
+        }
+      },
+      data: {
+        deletedAt: new Date()
+      }
     })
 
+    const newChat = await this.prismaService.chat.findUnique({
+      where: {
+        id: chatId
+      },
+      include: {
+        members: {
+          where: { deletedAt: null }
+        }
+      }
+    })
+
+    if (!newChat.members || newChat.members.length === 0) {
+      await this.prismaService.chat.delete({
+        where: {
+          id: chatId
+        }
+      })
+    }
     // Эмитим событие об удалении чата
     this.eventEmitter.emit('chat.deleted', {
       chatId,
-      participantIds,
       deletedBy: userId
     })
   }
@@ -608,20 +637,38 @@ export class ChatService {
       }
     })
 
-    if (existingMembers.length > 0) {
+    const oldMemberIds = existingMembers
+      .filter(m => m.deletedAt !== null)
+      .map(m => m.id) // Пользователи, когда-то удаленные из чата
+    const newMemberIds = participantIds.filter(id => !oldMemberIds.includes(id))
+
+    if (existingMembers.filter(m => m.deletedAt === null).length > 0) {
       throw new ConflictException(
         'Некоторые пользователи уже являются участниками чата'
       )
     }
 
-    await this.prismaService.chatMember.createMany({
-      data: participantIds.map(participantId => ({
-        chatId,
-        userId: participantId,
-        role: EnumMemberRole.MEMBER,
-        joinedAt: new Date()
-      }))
-    })
+    if (newMemberIds.length > 0) {
+      await this.prismaService.chatMember.createMany({
+        data: newMemberIds.map(participantId => ({
+          chatId,
+          userId: participantId,
+          role: EnumMemberRole.MEMBER,
+          joinedAt: new Date()
+        }))
+      })
+    }
+    if (oldMemberIds.length > 0) {
+      await this.prismaService.chatMember.updateMany({
+        where: {
+          chatId,
+          userId: { in: oldMemberIds }
+        },
+        data: {
+          deletedAt: null
+        }
+      })
+    }
 
     if (participantIds.length === 1) {
       const user = await this.prismaService.user.findUnique({
@@ -710,10 +757,13 @@ export class ChatService {
     if (existingParticipants.length < participantIds.length)
       throw new ForbiddenException('Некоторых участников нет в чате')
 
-    await this.prismaService.chatMember.deleteMany({
+    await this.prismaService.chatMember.updateMany({
       where: {
         chatId,
         userId: { in: participantIds }
+      },
+      data: {
+        deletedAt: new Date()
       }
     })
 
@@ -827,12 +877,15 @@ export class ChatService {
       }
     })
 
-    await this.prismaService.chatMember.delete({
+    await this.prismaService.chatMember.update({
       where: {
         chatId_userId: {
           chatId,
           userId
         }
+      },
+      data: {
+        deletedAt: new Date()
       }
     })
 
@@ -1156,14 +1209,28 @@ export class ChatService {
       throw new ConflictException('Вы уже являетесь участником этого чата')
     }
 
-    const member = await this.prismaService.chatMember.create({
-      data: {
-        chatId: chat.id,
-        userId,
-        role: EnumMemberRole.MEMBER,
-        joinedAt: new Date()
-      }
-    })
+    if (existingMember && existingMember.deletedAt !== null) {
+      await this.prismaService.chatMember.update({
+        where: {
+          chatId_userId: {
+            chatId: chat.id,
+            userId
+          }
+        },
+        data: {
+          deletedAt: null
+        }
+      })
+    } else {
+      await this.prismaService.chatMember.create({
+        data: {
+          chatId: chat.id,
+          userId,
+          role: EnumMemberRole.MEMBER,
+          joinedAt: new Date()
+        }
+      })
+    }
 
     const msg = await this.prismaService.message.create({
       data: {
@@ -1229,18 +1296,32 @@ export class ChatService {
       }
     })
 
-    if (existingMember) {
+    if (existingMember && existingMember.deletedAt === null) {
       throw new ConflictException('Вы уже являетесь участником этого чата')
     }
 
-    await this.prismaService.chatMember.create({
-      data: {
-        chatId: chat.id,
-        userId,
-        role: EnumMemberRole.MEMBER,
-        joinedAt: new Date()
-      }
-    })
+    if (existingMember && existingMember.deletedAt !== null) {
+      await this.prismaService.chatMember.update({
+        where: {
+          chatId_userId: {
+            chatId: chat.id,
+            userId
+          }
+        },
+        data: {
+          deletedAt: null
+        }
+      })
+    } else {
+      await this.prismaService.chatMember.create({
+        data: {
+          chatId: chat.id,
+          userId,
+          role: EnumMemberRole.MEMBER,
+          joinedAt: new Date()
+        }
+      })
+    }
 
     const msg = await this.prismaService.message.create({
       data: {

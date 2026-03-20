@@ -100,7 +100,7 @@ export class ChatController {
   @HttpCode(HttpStatus.OK)
   @Delete(':id/history')
   async remove(@Authorized('id') userId: string, @Param('id') id: string) {
-    await this.chatService.remove(id, userId)
+    await this.chatService.clearHistory(id, userId)
   }
 
   /**
@@ -113,7 +113,7 @@ export class ChatController {
     @Authorized('id') userId: string,
     @Param('id') id: string
   ) {
-    await this.chatService.clearHistory(id, userId)
+    await this.chatService.remove(id, userId)
   }
 
   /**

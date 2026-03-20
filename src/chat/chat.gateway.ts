@@ -128,16 +128,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * Событие: удален чат
    */
   @OnEvent('chat.deleted')
-  handleChatDeleted(payload: {
-    chatId: string
-    participantIds: string[]
-    deletedBy: string
-  }) {
-    const { chatId, participantIds, deletedBy } = payload
+  handleChatDeleted(payload: { chatId: string; deletedBy: string }) {
+    const { chatId, deletedBy } = payload
 
-    const notifyUserIds = participantIds.filter(id => id !== deletedBy)
-
-    this.notifyUsers(notifyUserIds, 'chat:deleted', {
+    this.notifyUser(deletedBy, 'chat:deleted', {
       chatId,
       deletedBy,
       message: 'Чат был удален'
